@@ -3,7 +3,7 @@ import { NetworkManager } from "../Networking/NetworkManager";
 import { Scene } from "./Scene";
 
 export class SceneManager {
-    activeScene!: Scene;
+    activeScene?: Scene;
     networkManager: NetworkManager;
     stage: Container;
 
@@ -21,13 +21,13 @@ export class SceneManager {
     }
 
     setScene(scene: Scene) {
-        this.stage.removeChild(this.activeScene);
+        if (this.activeScene) this.stage.removeChild(this.activeScene);
         this.activeScene = scene;
-        this.networkManager.sceneManager = this;
+        this.activeScene.sceneManager = this;
         this.stage.addChild(this.activeScene);
     }
 
     update(deltaTime: number) {
-        this.activeScene.update(deltaTime);
+        if (this.activeScene) this.activeScene.update(deltaTime);
     }
 }

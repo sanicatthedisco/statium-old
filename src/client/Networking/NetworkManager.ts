@@ -1,19 +1,7 @@
 import { Socket, io } from "socket.io-client";
 import { SceneManager } from "../Scenes/SceneManager";
 import { MainScene } from "../Scenes/MainScene";
-
-export interface CityData {
-    id: number;
-    x: number;
-    y: number;
-    ownerId?: string;
-    ownerSlot?: number;
-}
-
-interface Client {
-    slot: number;
-    id: string;
-}
+import { CityData, Client } from "../Utils/Communication";
 
 export class NetworkManager {
 	socket: Socket;

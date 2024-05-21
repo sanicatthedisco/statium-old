@@ -3,21 +3,9 @@ import { Server, Socket } from 'socket.io';
 import http from "http";
 import path from "path";
 import { Vector2 } from '../client/Utils/Vector2';
+import { CityData, Client } from '../client/Utils/Communication';
 
 const port: number = 3000;
-
-interface CityData {
-    id: number;
-    x: number;
-    y: number;
-    ownerId?: string;
-    ownerSlot?: number;
-}
-
-interface Client {
-    slot: number;
-    id: string;
-}
 
 class App {
     private server: http.Server;
@@ -27,7 +15,7 @@ class App {
     private clients: Client[] = [];
     private currentHighestSlot: number = 0;
 
-    private cityData: CityData[] = [];
+    private cityDataList: CityData[] = [];
     private cityRadius: number = 20;
     private cityPadding: number = 20;
     private cityNumber: number = 10;
@@ -57,19 +45,35 @@ class App {
             });
 
             this.io.emit("clientUpdate", this.clients);
-            socket.emit("initializeWorld", this.cityData);
+            socket.emit("initializeWorld", this.cityDataList);
 
             // Give this client a starting city and let everyone know
             // Find a city which isn't taken already
             let clientAssignedCity: CityData;
             do {
-                clientAssignedCity = this.randomChoice(this.cityData);
+                clientAssignedCity = this.randomChoice(this.cityDataList);
             } while (clientAssignedCity.ownerId != undefined)
             clientAssignedCity.ownerId = socket.id;
 
             clientAssignedCity.ownerSlot = this.currentHighestSlot;
 
             this.io.emit("cityUpdate", clientAssignedCity);
+
+            socket.on("cityUpdated", (cityData: CityData) => {
+                let correspondingCityData: CityData | undefined = this.cityDataList.find((city) => {
+                    return city.id == cityData.id;
+                });
+
+                if (correspondingCityData) {
+                    this.cityDataList[
+                        this.cityDataList.indexOf(correspondingCityData)
+                    ] = cityData;
+                } else {
+                    throw new Error("City couldn't find corresponding id");
+                }
+
+                socket.broadcast.emit("cityUpdate", cityData);
+            });
 
             socket.on("disconnect", () => {
                 console.log("Client with id " + socket.id.toString() + "has disconnected.");
@@ -85,7 +89,7 @@ class App {
     }
 
     cityIntersectsOther(cityToCheck: CityData) {
-        for (var city of this.cityData) {
+        for (var city of this.cityDataList) {
           if (cityToCheck != city) {
             let dist = Vector2.Subtract(new Vector2(cityToCheck.x, cityToCheck.y), 
                                         new Vector2(city.x, city.y)).magnitude();
@@ -107,11 +111,11 @@ class App {
             do {
             let x = Math.random() * 600 + 10;
             let y = Math.random() * 420 + 10;
-            city = {id: i, x: x, y: y, ownerId: undefined};
+            city = {id: i, x: x, y: y, ownerId: undefined, troopCount: 0};
             } while (this.cityIntersectsOther(city))
             
             // Once it's been found, add this city to the list of cities
-            this.cityData.push(city)
+            this.cityDataList.push(city)
         }
     }
 

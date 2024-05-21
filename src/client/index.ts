@@ -30,5 +30,3 @@ sm.setScene(main);
 Ticker.shared.add((deltaTime: number) => {
 	sm.update(deltaTime);
 });
-
-console.log("test");

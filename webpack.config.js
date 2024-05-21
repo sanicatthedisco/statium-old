@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
     entry: "./src/client/index.ts",
@@ -17,6 +18,15 @@ module.exports = {
     devServer: {
         static: {
             directory: path.join(__dirname, 'dist/client'),
+        },
+        compress: true,
+        allowedHosts: "all",
+        client: {
+          logging: "warn",
+          overlay: {
+            errors: true,
+            warnings: false,
+          },
         },
         hot: true,
         proxy: [
@@ -53,11 +63,22 @@ module.exports = {
         {
             test: /\.ts$/,
             loader: "ts-loader",
-            exclude: /node-modules/,
+            exclude: [/node-modules/, /src\/server/],
         }
       ],
     },
     resolve: {
         extensions: [".js", ".ts"],
-    }
+    },
+    optimization: {
+      runtimeChunk: "single",
+      minimize: true,
+      minimizer: [new TerserPlugin({
+          terserOptions: {
+              ecma: 6,
+              compress: { drop_console: true },
+              output: { comments: false, beautify: false },
+          },
+      })],
+    },
   };

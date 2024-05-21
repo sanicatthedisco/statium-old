@@ -2,6 +2,7 @@ import { Application, Graphics, Container, Ticker, Point, BitmapFont, BitmapText
 import { GameObject } from './GameObject';
 import { Troop } from './Troop';
 import { Scene } from '../Scenes/Scene';
+import { CityData } from '../Utils/Communication';
 //import { ServerCity } from '../../server';
 
 export class City extends GameObject {
@@ -42,7 +43,7 @@ export class City extends GameObject {
 
 		// Also set color and draws shape
 
-		this.updateSelf(this.ownerId, this.ownerSlot, this.x, this.y);
+		this.updateSelf(this.ownerId, this.ownerSlot, this.x, this.y, this.troopCount);
 
 		this.zIndex = 1;
 
@@ -128,11 +129,12 @@ export class City extends GameObject {
 		this.graphics.endFill();
 	}
 
-	updateSelf(ownerId: string | undefined, ownerSlot: number | undefined, x: number, y: number) {
+	updateSelf(ownerId: string | undefined, ownerSlot: number | undefined, x: number, y: number, troopCount: number) {
 		this.ownerId = ownerId;
 		this.ownerSlot = ownerSlot;
 		this.x = x;
 		this.y = y;
+		this.troopCount = troopCount;
 
 		if (this.ownerSlot != undefined) {
 			console.log("owner change");
@@ -144,5 +146,16 @@ export class City extends GameObject {
 		this.graphics.beginFill(this.color);
 		this.graphics.drawCircle(0, 0, this.radius);
 		this.graphics.endFill();
+	}
+
+	toCityData(): CityData {
+		return {
+			id: this.id,
+			ownerId: this.ownerId,
+			ownerSlot: this.ownerSlot,
+			x: this.x,
+			y: this.y,
+			troopCount: this.troopCount
+		};
 	}
 }

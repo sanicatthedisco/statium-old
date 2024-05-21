@@ -1,7 +1,7 @@
 import { FederatedPointerEvent } from "pixi.js";
 import { Scene } from "./Scene";
 import { City } from "../GameObjects/City";
-import { CityData } from "../Networking/NetworkManager";
+import { CityData } from "../Utils/Communication";
 
 export class MainScene extends Scene {
     originSelection: City | undefined = undefined;
@@ -20,7 +20,7 @@ export class MainScene extends Scene {
         if (matchingCity == undefined) {
             console.log("A city has not been synced properly.")
         } else {
-            matchingCity.updateSelf(cityData.ownerId, cityData.ownerSlot, cityData.x, cityData.y);
+            matchingCity.updateSelf(cityData.ownerId, cityData.ownerSlot, cityData.x, cityData.y, cityData.troopCount);
         }
     }
 

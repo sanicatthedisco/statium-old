@@ -14,7 +14,7 @@ var App = /** @class */ (function () {
         var _this = this;
         this.clients = [];
         this.currentHighestSlot = 0;
-        this.cityData = [];
+        this.cityDataList = [];
         this.cityRadius = 20;
         this.cityPadding = 20;
         this.cityNumber = 10;
@@ -36,16 +36,28 @@ var App = /** @class */ (function () {
                 id: socket.id
             });
             _this.io.emit("clientUpdate", _this.clients);
-            socket.emit("initializeWorld", _this.cityData);
+            socket.emit("initializeWorld", _this.cityDataList);
             // Give this client a starting city and let everyone know
             // Find a city which isn't taken already
             var clientAssignedCity;
             do {
-                clientAssignedCity = _this.randomChoice(_this.cityData);
+                clientAssignedCity = _this.randomChoice(_this.cityDataList);
             } while (clientAssignedCity.ownerId != undefined);
             clientAssignedCity.ownerId = socket.id;
             clientAssignedCity.ownerSlot = _this.currentHighestSlot;
             _this.io.emit("cityUpdate", clientAssignedCity);
+            socket.on("cityUpdated", function (cityData) {
+                var correspondingCityData = _this.cityDataList.find(function (city) {
+                    return city.id == cityData.id;
+                });
+                if (correspondingCityData) {
+                    _this.cityDataList[_this.cityDataList.indexOf(correspondingCityData)] = cityData;
+                }
+                else {
+                    throw new Error("City couldn't find corresponding id");
+                }
+                socket.broadcast.emit("cityUpdate", cityData);
+            });
             socket.on("disconnect", function () {
                 console.log("Client with id " + socket.id.toString() + "has disconnected.");
             });
@@ -58,7 +70,7 @@ var App = /** @class */ (function () {
         });
     };
     App.prototype.cityIntersectsOther = function (cityToCheck) {
-        for (var _i = 0, _a = this.cityData; _i < _a.length; _i++) {
+        for (var _i = 0, _a = this.cityDataList; _i < _a.length; _i++) {
             var city = _a[_i];
             if (cityToCheck != city) {
                 var dist = Vector2_1.Vector2.Subtract(new Vector2_1.Vector2(cityToCheck.x, cityToCheck.y), new Vector2_1.Vector2(city.x, city.y)).magnitude();
@@ -77,10 +89,10 @@ var App = /** @class */ (function () {
             do {
                 var x = Math.random() * 600 + 10;
                 var y = Math.random() * 420 + 10;
-                city = { id: i, x: x, y: y, ownerId: undefined };
+                city = { id: i, x: x, y: y, ownerId: undefined, troopCount: 0 };
             } while (this.cityIntersectsOther(city));
             // Once it's been found, add this city to the list of cities
-            this.cityData.push(city);
+            this.cityDataList.push(city);
         }
     };
     App.prototype.randomChoice = function (array) {

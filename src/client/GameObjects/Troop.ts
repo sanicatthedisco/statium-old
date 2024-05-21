@@ -3,6 +3,7 @@ import { GameObject } from './GameObject';
 import { Vector2 } from '../Utils/Vector2';
 import { Scene } from '../Scenes/Scene';
 import { City } from './City';
+import { CityData } from '../Utils/Communication';
 
 export class Troop extends GameObject {
 	static radius: number = 10;
@@ -40,10 +41,16 @@ export class Troop extends GameObject {
 				if (this.destination.troopCount > 0) { 
 					this.destination.increaseTroopCount(-1);
 				} else {
-					this.destination.updateSelf(this.ownerId, this.scene.sceneManager.networkManager.getClientSlot(this.ownerId),
-												this.destination.x, this.destination.y);
+					if (!this.scene.sceneManager) throw new Error("Scenemanager is undefined!");
+					else {
+						console.log(this.scene.sceneManager.networkManager);
+						this.destination.updateSelf(this.ownerId, 
+							this.scene.sceneManager.networkManager.getClientSlot(this.ownerId),
+							this.destination.x, this.destination.y, this.destination.troopCount);
+					}
 				}
 			}
+			this.emit("cityUpdate", this.destination.toCityData)
 			this.destroy();
 		}
 	}

@@ -23,6 +23,7 @@
     "pixi.js": "^7.4.0",
     "socket.io": "^4.7.5",
     "socket.io-client": "^4.7.5",
+    "terser-webpack-plugin": "^5.3.10",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.5",
     "webpack": "^5.91.0",

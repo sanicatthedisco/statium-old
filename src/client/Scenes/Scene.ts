@@ -6,7 +6,7 @@ import { City } from "../GameObjects/City";
 export class Scene extends Container {
     gameObjects: GameObject[] = [];
     ranOnce: boolean;
-	sceneManager!: SceneManager;
+	sceneManager: SceneManager | undefined;
 
 	constructor() {
 		super();

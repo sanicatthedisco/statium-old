@@ -1,6 +1,8 @@
 import { Container } from "pixi.js";
 import { NetworkManager } from "../Networking/NetworkManager";
 import { Scene } from "./Scene";
+import { GameState } from "../Utils/Communication";
+import { MainScene } from "./MainScene";
 
 export class SceneManager {
     activeScene?: Scene;
@@ -11,13 +13,17 @@ export class SceneManager {
         this.stage = stage;
         this.networkManager = networkManager;
         this.networkManager.sceneManager = this;
+    }
 
-        const button = document.createElement("button");
-        button.innerHTML = "Click me!";
-        button.onclick = () => {
-            console.log(this.networkManager.clients[0].id);
+    imposeGameState(gameState: GameState) {
+        // Probably very unoptimized
+        if (this.activeScene instanceof MainScene) {
+            gameState.cityDataList.forEach((cityData) => {
+                (this.activeScene as MainScene).updateCity(cityData);
+            });
+        } else {
+            throw new Error("Haven't implemented other game states yet")
         }
-        document.body.appendChild(button);
     }
 
     setScene(scene: Scene) {

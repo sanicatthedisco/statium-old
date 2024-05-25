@@ -1,5 +1,5 @@
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
@@ -12,14 +12,13 @@ module.exports = {
       path: path.resolve(__dirname, 'dist/client'),
       clean: true,
     },
-    mode: "production",
+    mode: "development",
     node: false,
-    devtool: 'eval-source-map',
+    devtool: 'inline-source-map',
     devServer: {
         static: {
             directory: path.join(__dirname, 'dist/client'),
         },
-        compress: true,
         allowedHosts: "all",
         client: {
           logging: "warn",
@@ -38,7 +37,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-          title: "Output Management",
+          title: "Statium Client",
           template: "./src/client/index.html",
         }),
       ],
@@ -70,6 +69,7 @@ module.exports = {
     resolve: {
         extensions: [".js", ".ts"],
     },
+    /*
     optimization: {
       runtimeChunk: "single",
       minimize: true,
@@ -80,5 +80,5 @@ module.exports = {
               output: { comments: false, beautify: false },
           },
       })],
-    },
+    },*/
   };

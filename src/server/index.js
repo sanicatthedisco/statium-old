@@ -8,6 +8,7 @@ var socket_io_1 = require("socket.io");
 var http_1 = __importDefault(require("http"));
 var path_1 = __importDefault(require("path"));
 var Vector2_1 = require("../client/Utils/Vector2");
+var GameParameters_1 = require("../client/Utils/GameParameters");
 var port = 3000;
 var App = /** @class */ (function () {
     function App(port) {
@@ -18,6 +19,7 @@ var App = /** @class */ (function () {
         this.cityRadius = 20;
         this.cityPadding = 20;
         this.cityNumber = 10;
+        this.emitGameStateInterval = 100; // ms
         this.port = port;
         // Start server
         var app = (0, express_1.default)();
@@ -26,37 +28,28 @@ var App = /** @class */ (function () {
         this.io = new socket_io_1.Server(this.server);
         // Set up world
         this.generateCities(this.cityNumber);
-        // Client communication
+        // Client update loop
+        setInterval(function () {
+            var now = Date.now();
+            if (!_this.lastSpawnTime)
+                _this.lastSpawnTime = now;
+            if (now - _this.lastSpawnTime > GameParameters_1.GameParameters.troopSpawnInterval) {
+                _this.lastSpawnTime = now;
+                _this.cityDataList.forEach(function (cityData, i, arr) {
+                    if (cityData.troopCount < GameParameters_1.GameParameters.maxTroopCount)
+                        arr[i].troopCount += 1;
+                });
+            }
+            var gameState = {
+                cityDataList: _this.cityDataList,
+            };
+            _this.io.emit("updateGameState", gameState);
+        }, this.emitGameStateInterval); // Start client update loop
         this.io.on("connection", function (socket) {
             console.log("Client with id " + socket.id.toString() + "has connected.");
-            // Initialize client
-            _this.currentHighestSlot += 1;
-            _this.clients.push({
-                slot: _this.currentHighestSlot,
-                id: socket.id
-            });
-            _this.io.emit("clientUpdate", _this.clients);
-            socket.emit("initializeWorld", _this.cityDataList);
-            // Give this client a starting city and let everyone know
-            // Find a city which isn't taken already
-            var clientAssignedCity;
-            do {
-                clientAssignedCity = _this.randomChoice(_this.cityDataList);
-            } while (clientAssignedCity.ownerId != undefined);
-            clientAssignedCity.ownerId = socket.id;
-            clientAssignedCity.ownerSlot = _this.currentHighestSlot;
-            _this.io.emit("cityUpdate", clientAssignedCity);
-            socket.on("cityUpdated", function (cityData) {
-                var correspondingCityData = _this.cityDataList.find(function (city) {
-                    return city.id == cityData.id;
-                });
-                if (correspondingCityData) {
-                    _this.cityDataList[_this.cityDataList.indexOf(correspondingCityData)] = cityData;
-                }
-                else {
-                    throw new Error("City couldn't find corresponding id");
-                }
-                socket.broadcast.emit("cityUpdate", cityData);
+            _this.initializeClient(socket);
+            socket.on("pendingClientCommands", function (clientCommands) {
+                _this.reconcileClientCommands(clientCommands);
             });
             socket.on("disconnect", function () {
                 console.log("Client with id " + socket.id.toString() + "has disconnected.");
@@ -68,6 +61,35 @@ var App = /** @class */ (function () {
         this.server.listen(this.port, function () {
             console.log("Server listening on port " + _this.port);
         });
+    };
+    App.prototype.reconcileClientCommands = function (clientCommands) {
+        var _this = this;
+        // Directly modifies server's game state with client's commands from last loop
+        // No protection for now
+        clientCommands.forEach(function (command) {
+            var originIndex = _this.cityDataList.findIndex(function (cd) { return cd.id == command.originId; });
+            _this.cityDataList[originIndex].troopSendNumber = command.troopCount;
+            _this.cityDataList[originIndex].destinationId = command.destinationId;
+            // also needs to tell server about destination getting reduced
+        });
+    };
+    App.prototype.initializeClient = function (socket) {
+        // Initialize client id & let everyone know
+        this.currentHighestSlot += 1;
+        this.clients.push({
+            slot: this.currentHighestSlot,
+            id: socket.id
+        });
+        this.io.emit("clientUpdate", this.clients);
+        socket.emit("initializeWorld", this.cityDataList);
+        // Give this client a starting city and let everyone know
+        // Find a city which isn't taken already
+        var clientAssignedCity;
+        do {
+            clientAssignedCity = this.randomChoice(this.cityDataList);
+        } while (clientAssignedCity.ownerId != undefined);
+        clientAssignedCity.ownerId = socket.id;
+        clientAssignedCity.ownerSlot = this.currentHighestSlot;
     };
     App.prototype.cityIntersectsOther = function (cityToCheck) {
         for (var _i = 0, _a = this.cityDataList; _i < _a.length; _i++) {
@@ -89,7 +111,7 @@ var App = /** @class */ (function () {
             do {
                 var x = Math.random() * 600 + 10;
                 var y = Math.random() * 420 + 10;
-                city = { id: i, x: x, y: y, ownerId: undefined, troopCount: 0 };
+                city = { id: i, x: x, y: y, ownerId: undefined, troopCount: 0, troopSendNumber: 0, destinationId: undefined };
             } while (this.cityIntersectsOther(city));
             // Once it's been found, add this city to the list of cities
             this.cityDataList.push(city);

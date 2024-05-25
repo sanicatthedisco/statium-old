@@ -50,7 +50,7 @@ export class Troop extends GameObject {
 					}
 				}
 			}
-			this.emit("cityUpdate", this.destination.toCityData)
+			this.emit("cityUpdate", City.toCityData(this.destination));
 			this.destroy();
 		}
 	}

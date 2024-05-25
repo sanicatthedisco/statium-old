@@ -1,7 +1,7 @@
 import { FederatedPointerEvent } from "pixi.js";
 import { Scene } from "./Scene";
 import { City } from "../GameObjects/City";
-import { CityData } from "../Utils/Communication";
+import { CityData, Command, GameState } from "../Utils/Communication";
 
 export class MainScene extends Scene {
     originSelection: City | undefined = undefined;
@@ -16,7 +16,6 @@ export class MainScene extends Scene {
     }
     updateCity(cityData: CityData) {
         let matchingCity = this.cities.find((city) => {return city.id == cityData.id});
-        console.log(cityData);
         if (matchingCity == undefined) {
             console.log("A city has not been synced properly.")
         } else {
@@ -24,10 +23,29 @@ export class MainScene extends Scene {
         }
     }
 
+    issueCommand(origin: City, destination: City, troopSendNumber: number) {
+        origin.commandToSendTroops(troopSendNumber, destination);
+        let command: Command = {
+            originId: origin.id,
+            destinationId: destination.id,
+            troopCount: troopSendNumber
+        }
+        this.sceneManager!.networkManager.commandBuffer.push(command);
+    }
+
+    getCityDataList(): CityData[] {
+        let cityDataList: CityData[] = [];
+        this.cities.forEach((city) => {
+            let cityData = City.toCityData(city);
+            cityDataList.push(cityData);
+        }); 
+        return cityDataList;
+    }
+
     // A bunch of spaghetti. Controls which cities are selected
     // as the origin and destination for a troop movement
     // and if both are selected, initiates movement,
-    // then deselects them.
+    // then deselects them.s
     override manageSelection(city: City, e: FederatedPointerEvent) {
         if (this.originSelection === undefined) {
             this.originSelection = city;
@@ -49,8 +67,7 @@ export class MainScene extends Scene {
                     city.selectAs("destination");
                     */
 
-                    this.originSelection.sendTroops(this.originSelection.troopCount, 
-                                                    city);
+                    this.issueCommand(this.originSelection, city, this.originSelection.troopCount);
                     
                     city.selectAs("none");
                     this.originSelection.selectAs("none");

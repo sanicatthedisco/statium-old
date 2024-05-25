@@ -3,11 +3,11 @@ import { GameObject } from './GameObject';
 import { Troop } from './Troop';
 import { Scene } from '../Scenes/Scene';
 import { CityData } from '../Utils/Communication';
+import { GameParameters as Params } from '../Utils/GameParameters';
 //import { ServerCity } from '../../server';
 
 export class City extends GameObject {
 	static maxTroopCount: number = 99;
-	static troopIncreaseInterval: number = 70;
 	static radius = 20;
 
 	static originHighlightColor: number = 0x0000aa;
@@ -20,16 +20,15 @@ export class City extends GameObject {
 	text: BitmapText;
 	color: number;
 	troopCount: number = 10;
-	troopIncreaseCounter: number = 0;
+	troopIncreaseTicker: number = 0;
 	radius: number;
 	ownerId?: string;
 	ownerSlot?: number;
 	id: number;
 
 	troopSendNumber: number = 0;
-	destination: any = undefined;
-	troopSpawnTicker: number = 0;
-	troopSpawnInterval: number = 9;
+	destination?: City = undefined;
+	lastSpawnTime?: number;
 
 	constructor(x: number, y: number, scene: Scene, id: number, ownerId?: string, ownerSlot?: number) {
 		super(x, y, scene);
@@ -64,39 +63,51 @@ export class City extends GameObject {
 	}
 
 	override update(deltaTime: number) {
-		// Replenish troops over time, but only if we're not sending troops currently
-		if (this.troopSendNumber == 0) {
-			this.troopIncreaseCounter += deltaTime;
-		}
-		if (this.troopIncreaseCounter > City.troopIncreaseInterval) {
-			this.troopIncreaseCounter = 0;
-			this.increaseTroopCount(1);
-		}
+		// Send troops out at intervals if they need to be sent
+		// And only regenerate troops if we're not currently sending any
 
-		// If we have troops to send, send them out at regular intervals
-		if (this.troopSendNumber > this.troopCount) {
-			this.troopSendNumber = this.troopCount;
-		}
-		this.troopSpawnTicker += deltaTime;
-		if (this.ownerId) {
-			if (this.troopSendNumber > 0 && this.troopSpawnTicker > this.troopSpawnInterval) {
-				this.troopSendNumber -= 1;
-				this.troopSpawnTicker = 0;
-				new Troop(this.x, this.y, this.destination, this.scene, this.ownerId);
-				this.increaseTroopCount(-1);
-			}
+		if (this.troopSendNumber > 0) {
+			this.sendTroopsIfPossible();
 		} else {
-			if (this.troopSendNumber > 0) { console.error("A city with no ownerId is trying to send troops! Why??"); }
+			// Troop regrowth
+
+			this.troopIncreaseTicker += deltaTime;
+			if (this.troopIncreaseTicker > Params.troopIncreaseInterval) {
+				this.troopIncreaseTicker = 0;
+				this.increaseTroopCount(1);
+			}
 		}
 	}
 
-	sendTroops(quantity: number, destination: City) {
+	sendTroopsIfPossible() {
+		// Clamp troop send number to available troops
+		if (this.troopSendNumber > this.troopCount) {
+			this.troopSendNumber = this.troopCount;
+		}
+
+		let now = Date.now();
+		if (!this.lastSpawnTime) this.lastSpawnTime = now; // on first loop, init
+
+		// Spawn troops at intervals
+		if (this.troopSendNumber > 0 && // If we have troops to send
+		now - this.lastSpawnTime > Params.troopSpawnInterval // And the interval has elapsed
+		&& this.ownerId && this.destination) { // Sanity check that we have an owner and a destination
+				
+			// Spawn the troop and update the relevant counters
+			new Troop(this.x, this.y, this.destination, this.scene, this.ownerId);
+
+			this.increaseTroopCount(-1);
+			this.lastSpawnTime = now;
+		}
+	}
+
+	commandToSendTroops(quantity: number, destination: City) {
 		this.troopSendNumber = quantity;
 		this.destination = destination;
 	}
 
 	increaseTroopCount(count: number) {
-		if (count > 0 && this.troopCount < City.maxTroopCount) {
+		if (count > 0 && this.troopCount < Params.maxTroopCount) {
 			this.troopCount += count;
 		}
 		if (count < 0 && this.troopCount > 0) {
@@ -137,25 +148,26 @@ export class City extends GameObject {
 		this.troopCount = troopCount;
 
 		if (this.ownerSlot != undefined) {
-			console.log("owner change");
 			this.color = City.playerColors[this.ownerSlot];
-		} else {
-			console.log("wtf");
 		}
+
+		if (this.text) this.text.text = this.troopCount.toString();
 
 		this.graphics.beginFill(this.color);
 		this.graphics.drawCircle(0, 0, this.radius);
 		this.graphics.endFill();
 	}
 
-	toCityData(): CityData {
+	static toCityData(city: City): CityData {
 		return {
-			id: this.id,
-			ownerId: this.ownerId,
-			ownerSlot: this.ownerSlot,
-			x: this.x,
-			y: this.y,
-			troopCount: this.troopCount
+			id: city.id,
+			ownerId: city.ownerId,
+			ownerSlot: city.ownerSlot,
+			x: city.x,
+			y: city.y,
+			troopCount: city.troopCount,
+			destinationId: city.destination?.id,
+			troopSendNumber: city.troopSendNumber
 		};
 	}
 }

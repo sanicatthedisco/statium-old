@@ -3,7 +3,8 @@ import { Server, Socket } from 'socket.io';
 import http from "http";
 import path from "path";
 import { Vector2 } from '../client/Utils/Vector2';
-import { CityData, Client } from '../client/Utils/Communication';
+import { CityData, Client, Command, GameState } from '../client/Utils/Communication';
+import { GameParameters as Params } from '../client/Utils/GameParameters';
 
 const port: number = 3000;
 
@@ -20,6 +21,9 @@ class App {
     private cityPadding: number = 20;
     private cityNumber: number = 10;
 
+    emitGameStateInterval: number = 100; // ms
+    lastSpawnTime?: number;
+
     constructor(port: number) {
         this.port = port;
 
@@ -33,46 +37,31 @@ class App {
         // Set up world
         this.generateCities(this.cityNumber);
 
-        // Client communication
+        // Client update loop
+        setInterval(() => {
+            let now = Date.now();
+            if (!this.lastSpawnTime) this.lastSpawnTime = now;
+            if (now - this.lastSpawnTime > Params.troopSpawnInterval) {
+                this.lastSpawnTime = now;
+                this.cityDataList.forEach((cityData, i, arr) => {
+                    if (cityData.troopCount < Params.maxTroopCount)
+                        arr[i].troopCount += 1;
+                });
+            }
+
+            let gameState: GameState = {
+                cityDataList: this.cityDataList,
+            };
+            this.io.emit("updateGameState", gameState);
+            
+        }, this.emitGameStateInterval); // Start client update loop
+
         this.io.on("connection", (socket: Socket) => {
             console.log("Client with id " + socket.id.toString() + "has connected.");
+            this.initializeClient(socket);
 
-            // Initialize client
-            this.currentHighestSlot += 1;
-            this.clients.push({
-                slot: this.currentHighestSlot,
-                id: socket.id
-            });
-
-            this.io.emit("clientUpdate", this.clients);
-            socket.emit("initializeWorld", this.cityDataList);
-
-            // Give this client a starting city and let everyone know
-            // Find a city which isn't taken already
-            let clientAssignedCity: CityData;
-            do {
-                clientAssignedCity = this.randomChoice(this.cityDataList);
-            } while (clientAssignedCity.ownerId != undefined)
-            clientAssignedCity.ownerId = socket.id;
-
-            clientAssignedCity.ownerSlot = this.currentHighestSlot;
-
-            this.io.emit("cityUpdate", clientAssignedCity);
-
-            socket.on("cityUpdated", (cityData: CityData) => {
-                let correspondingCityData: CityData | undefined = this.cityDataList.find((city) => {
-                    return city.id == cityData.id;
-                });
-
-                if (correspondingCityData) {
-                    this.cityDataList[
-                        this.cityDataList.indexOf(correspondingCityData)
-                    ] = cityData;
-                } else {
-                    throw new Error("City couldn't find corresponding id");
-                }
-
-                socket.broadcast.emit("cityUpdate", cityData);
+            socket.on("pendingClientCommands", (clientCommands: Command[]) => {
+                this.reconcileClientCommands(clientCommands);
             });
 
             socket.on("disconnect", () => {
@@ -86,6 +75,41 @@ class App {
         this.server.listen(this.port, () => {
            console.log("Server listening on port " + this.port); 
         });
+    }
+
+    reconcileClientCommands(clientCommands: Command[]) {
+        // Directly modifies server's game state with client's commands from last loop
+        // No protection for now
+        clientCommands.forEach((command) => {
+			let originIndex = this.cityDataList.findIndex((cd) => {return cd.id == command.originId});
+
+			this.cityDataList[originIndex].troopSendNumber = command.troopCount;
+			this.cityDataList[originIndex].destinationId = command.destinationId;
+
+            // also needs to tell server about destination getting reduced
+		});
+    }
+
+    initializeClient(socket: Socket) {
+        // Initialize client id & let everyone know
+        this.currentHighestSlot += 1;
+        this.clients.push({
+            slot: this.currentHighestSlot,
+            id: socket.id
+        });
+
+        this.io.emit("clientUpdate", this.clients);
+        socket.emit("initializeWorld", this.cityDataList);
+
+        // Give this client a starting city and let everyone know
+        // Find a city which isn't taken already
+        let clientAssignedCity: CityData;
+        do {
+            clientAssignedCity = this.randomChoice(this.cityDataList);
+        } while (clientAssignedCity.ownerId != undefined)
+        clientAssignedCity.ownerId = socket.id;
+
+        clientAssignedCity.ownerSlot = this.currentHighestSlot;
     }
 
     cityIntersectsOther(cityToCheck: CityData) {
@@ -111,7 +135,7 @@ class App {
             do {
             let x = Math.random() * 600 + 10;
             let y = Math.random() * 420 + 10;
-            city = {id: i, x: x, y: y, ownerId: undefined, troopCount: 0};
+            city = {id: i, x: x, y: y, ownerId: undefined, troopCount: 0, troopSendNumber: 0, destinationId: undefined};
             } while (this.cityIntersectsOther(city))
             
             // Once it's been found, add this city to the list of cities

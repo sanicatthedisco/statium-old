@@ -4,9 +4,6 @@ import { SceneManager } from "./Scenes/SceneManager";
 import { io } from "socket.io-client";
 import { MainScene } from "./Scenes/MainScene";
 
-// Initialize connection to server
-const nm: NetworkManager = new NetworkManager();
-
 // Game stuff
 BitmapFont.from("TroopCountFont", {
 	fontFamily: "Arial",
@@ -14,19 +11,47 @@ BitmapFont.from("TroopCountFont", {
 	fill: 0xffffff
 })
 
-const app = new Application<HTMLCanvasElement>({
+const appParams = {
 	view: document.getElementById("pixi-canvas") as HTMLCanvasElement,
 	resolution: window.devicePixelRatio || 1,
 	autoDensity: true,
 	backgroundColor: "#eee",
 	width: 640,
 	height: 480
-});
+}
 
-const sm: SceneManager = new SceneManager(app.stage, nm);
-const main: MainScene = new MainScene();
-sm.setScene(main);
+class App {
+	networkManager: NetworkManager;
+	sceneManager: SceneManager;
+	app: Application;
 
-Ticker.shared.add((deltaTime: number) => {
-	sm.update(deltaTime);
-});
+	constructor(params: any) {
+		this.app = new Application<HTMLCanvasElement>(params);
+
+		this.networkManager = new NetworkManager();
+		this.sceneManager = new SceneManager(this.app.stage, this.networkManager);
+	}
+
+	beginConnection() {
+		this.networkManager.initServerConnection();
+	}
+
+	startGame() {
+		this.sceneManager.setScene(new MainScene());
+
+		Ticker.shared.add((deltaTime: number) => {
+			this.sceneManager.update(deltaTime);
+		});
+	}
+
+	start() {
+		this.beginConnection();
+		this.startGame();
+	}
+}
+
+const app: App = new App(appParams);
+
+(document.getElementById("start") as HTMLButtonElement).onclick = () => {
+	app.start();
+}

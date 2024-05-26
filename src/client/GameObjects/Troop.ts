@@ -35,22 +35,7 @@ export class Troop extends GameObject {
 		this.move(Vector2.Multiply(this.dirVector.norm(), this.speed * deltaTime));
 
 		if (this.dirVector.magnitude() < 20) {
-			if (this.destination.ownerId == this.ownerId) {
-				this.destination.increaseTroopCount(1);
-			} else {
-				if (this.destination.troopCount > 0) { 
-					this.destination.increaseTroopCount(-1);
-				} else {
-					if (!this.scene.sceneManager) throw new Error("Scenemanager is undefined!");
-					else {
-						console.log(this.scene.sceneManager.networkManager);
-						this.destination.updateSelf(this.ownerId, 
-							this.scene.sceneManager.networkManager.getClientSlot(this.ownerId),
-							this.destination.x, this.destination.y, this.destination.troopCount);
-					}
-				}
-			}
-			this.emit("cityUpdate", City.toCityData(this.destination));
+			this.destination.interactWithTroop(this.ownerId);
 			this.destroy();
 		}
 	}

@@ -19,7 +19,20 @@ export class SceneManager {
         // Probably very unoptimized
         if (this.activeScene instanceof MainScene) {
             gameState.cityDataList.forEach((cityData) => {
-                (this.activeScene as MainScene).updateCity(cityData);
+
+                let matchingCity = (this.activeScene as MainScene).cities.find((city) => 
+                    {return city.id == cityData.id}
+                );
+
+                if (matchingCity == undefined) {
+                    
+                    console.log(gameState.cityDataList);
+                    console.log((this.activeScene as MainScene).cities);
+                    throw new Error("A city has not been synced properly");
+                } else {
+                    matchingCity.setTroopCount(cityData.troopCount);
+                    matchingCity.setOwner(cityData.ownerId);
+                }
             });
         } else {
             throw new Error("Haven't implemented other game states yet")

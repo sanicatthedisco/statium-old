@@ -3,10 +3,13 @@ export interface CityData {
     x: number;
     y: number;
     ownerId?: string;
-    ownerSlot?: number;
     troopCount: number;
     troopSendNumber: number;
     destinationId: number | undefined;
+    lastSpawnTime?: number;
+    lastTroopIncreaseTime?: number;
+    lastTroopDamageTime?: number;
+    ownerIdOfLastDamagingTroop?: string;
 }
 
 export interface Client {
@@ -16,6 +19,7 @@ export interface Client {
 
 export interface GameState {
     cityDataList: CityData[];
+    creationTime: number;
 }
 
 export interface Command {

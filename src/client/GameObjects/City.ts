@@ -1,4 +1,4 @@
-import { Application, Graphics, Container, Ticker, Point, BitmapFont, BitmapText, FederatedPointerEvent } from 'pixi.js';
+import { BitmapText, FederatedPointerEvent } from 'pixi.js';
 import { GameObject } from './GameObject';
 import { Troop } from './Troop';
 import { Scene } from '../Scenes/Scene';
@@ -23,26 +23,25 @@ export class City extends GameObject {
 	troopIncreaseTicker: number = 0;
 	radius: number;
 	ownerId?: string;
-	ownerSlot?: number;
 	id: number;
 
 	troopSendNumber: number = 0;
 	destination?: City = undefined;
 	lastSpawnTime?: number;
+	lastTroopIncreaseTime?: number;
+	lastTroopDamageTime?: number;
+	ownerIdOfLastDamagingTroop?: string;
 
 	constructor(x: number, y: number, scene: Scene, id: number, ownerId?: string, ownerSlot?: number) {
 		super(x, y, scene);
 
 		this.id = id;
 		this.ownerId = ownerId;
-		this.ownerSlot = ownerSlot;
 
-		this.color = 0xdddddd;
+		this.color = City.defaultColor;
 		this.radius = 20;
 
-		// Also set color and draws shape
-
-		this.updateSelf(this.ownerId, this.ownerSlot, this.x, this.y, this.troopCount);
+		this.setOwner(ownerId);
 
 		this.zIndex = 1;
 
@@ -57,6 +56,8 @@ export class City extends GameObject {
 		this.addChild(this.text);
 		this.text.text = this.troopCount.toString();
 
+		this.setTroopCount(this.troopCount);
+
 		// Deal with mouse clicks
 		this.eventMode = "dynamic";
 		this.on("pointertap", this.onClick, this);
@@ -66,54 +67,134 @@ export class City extends GameObject {
 		// Send troops out at intervals if they need to be sent
 		// And only regenerate troops if we're not currently sending any
 
-		if (this.troopSendNumber > 0) {
-			this.sendTroopsIfPossible();
+		if (this.troopCount < 0) {
+			// We should change owners, but let's wait for the server to adjudicate that for us.
+			// in the mean time, stop doing anything
 		} else {
-			// Troop regrowth
-
-			this.troopIncreaseTicker += deltaTime;
-			if (this.troopIncreaseTicker > Params.troopIncreaseInterval) {
-				this.troopIncreaseTicker = 0;
-				this.increaseTroopCount(1);
+			if (this.troopSendNumber > 0) {
+				this.sendTroopsIfPossible();
+			} else {
+				this.regenerateTroops();
 			}
 		}
+
+
+
 	}
 
 	sendTroopsIfPossible() {
-		// Clamp troop send number to available troops
-		if (this.troopSendNumber > this.troopCount) {
-			this.troopSendNumber = this.troopCount;
+		if (this.troopCount <= 1) {
+			this.troopSendNumber = 0;
 		}
 
 		let now = Date.now();
 		if (!this.lastSpawnTime) this.lastSpawnTime = now; // on first loop, init
 
 		// Spawn troops at intervals
-		if (this.troopSendNumber > 0 && // If we have troops to send
+		if (this.troopCount > 1 && // If we have troops to send
 		now - this.lastSpawnTime > Params.troopSpawnInterval // And the interval has elapsed
 		&& this.ownerId && this.destination) { // Sanity check that we have an owner and a destination
 				
 			// Spawn the troop and update the relevant counters
 			new Troop(this.x, this.y, this.destination, this.scene, this.ownerId);
 
-			this.increaseTroopCount(-1);
+			this.changeTroopCountBy(-1);
 			this.lastSpawnTime = now;
 		}
 	}
 
+	regenerateTroops() {
+		let now = Date.now();
+		if (!this.lastTroopIncreaseTime) this.lastTroopIncreaseTime = now;
+		if (!this.lastTroopDamageTime) this.lastTroopDamageTime = now;
+
+		if (now - this.lastTroopIncreaseTime > Params.troopIncreaseInterval &&
+			now - this.lastTroopDamageTime > Params.damageRecoveryTime) {
+			this.changeTroopCountBy(1);
+
+			this.lastTroopIncreaseTime = now;
+		}
+	}
+	
+	public interactWithTroop(troopOwnerId: string) {
+		if (this.ownerId == troopOwnerId) {
+			this.changeTroopCountBy(1);
+		} else {
+			this.lastTroopDamageTime = Date.now();
+			this.ownerIdOfLastDamagingTroop = troopOwnerId;
+
+			this.changeTroopCountBy(-1);
+			// let the server handle the ownership change
+
+			/*else {
+				if (!this.scene.sceneManager) throw new Error("Scenemanager is undefined!");
+				else {
+					this.ownerId = troopOwnerId;
+					this.ownerSlot = this.scene.sceneManager.networkManager.getClientSlot(troopOwnerId);
+				}
+			}*/
+		}
+	}
+
+	// Changing state
+
+	setTroopCount(count: number) {
+		if (count < (this.ownerId ? Params.maxTroopCount : Params.maxTroopCountUnowned)) {
+			this.troopCount = count;
+		} else {
+			this.troopCount = this.ownerId ? Params.maxTroopCount : Params.maxTroopCountUnowned;
+		}
+
+		if (!this.text) throw new Error("There is no text on this city!");
+		this.text.text = this.troopCount.toString();
+	}
+	changeTroopCountBy = (delta: number) => {this.setTroopCount(this.troopCount + delta)};
+
+	setOwner(newOwnerId: string | undefined) {
+		this.ownerId = newOwnerId;
+
+		let newSlot: number | undefined;
+		if (!newOwnerId) {
+			this.color = City.defaultColor;
+		} else {
+			if (!this.scene.sceneManager) throw new Error("No scene manager set");
+			else newSlot = this.scene.sceneManager.networkManager.getClientSlot(newOwnerId!);
+
+			if (!newSlot) throw new Error("This client has no slot!");
+			this.color = City.playerColors[newSlot];
+		}
+
+		this.graphics.beginFill(this.color);
+		this.graphics.drawCircle(0, 0, this.radius);
+		this.graphics.endFill();
+	}
+
+	/*
+
+	updateSelf(cd: CityData) {
+		this.ownerId = cd.ownerId;
+		this.ownerSlot = cd.ownerSlot;
+		this.x = cd.x;
+		this.y = cd.y;
+		this.troopCount = cd.troopCount;
+
+		if (this.ownerSlot != undefined) {
+			this.color = City.playerColors[this.ownerSlot];
+		}
+
+		if (this.text) this.text.text = (this.troopCount < 0 ? "-" : "") + this.troopCount.toString();
+
+		this.graphics.beginFill(this.color);
+		this.graphics.drawCircle(0, 0, this.radius);
+		this.graphics.endFill();
+	}
+	*/
+
+	// User control
+
 	commandToSendTroops(quantity: number, destination: City) {
 		this.troopSendNumber = quantity;
 		this.destination = destination;
-	}
-
-	increaseTroopCount(count: number) {
-		if (count > 0 && this.troopCount < Params.maxTroopCount) {
-			this.troopCount += count;
-		}
-		if (count < 0 && this.troopCount > 0) {
-			this.troopCount += count;
-		} 
-		this.text.text = this.troopCount.toString();
 	}
 
 	onClick(e: FederatedPointerEvent) {
@@ -140,34 +221,18 @@ export class City extends GameObject {
 		this.graphics.endFill();
 	}
 
-	updateSelf(ownerId: string | undefined, ownerSlot: number | undefined, x: number, y: number, troopCount: number) {
-		this.ownerId = ownerId;
-		this.ownerSlot = ownerSlot;
-		this.x = x;
-		this.y = y;
-		this.troopCount = troopCount;
-
-		if (this.ownerSlot != undefined) {
-			this.color = City.playerColors[this.ownerSlot];
-		}
-
-		if (this.text) this.text.text = this.troopCount.toString();
-
-		this.graphics.beginFill(this.color);
-		this.graphics.drawCircle(0, 0, this.radius);
-		this.graphics.endFill();
-	}
-
+	// Utility method
 	static toCityData(city: City): CityData {
 		return {
 			id: city.id,
 			ownerId: city.ownerId,
-			ownerSlot: city.ownerSlot,
 			x: city.x,
 			y: city.y,
 			troopCount: city.troopCount,
 			destinationId: city.destination?.id,
-			troopSendNumber: city.troopSendNumber
+			troopSendNumber: city.troopSendNumber,
+			lastTroopDamageTime: city.lastTroopDamageTime,
+			ownerIdOfLastDamagingTroop: city.ownerIdOfLastDamagingTroop
 		};
 	}
 }

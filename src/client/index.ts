@@ -9,7 +9,7 @@ BitmapFont.from("TroopCountFont", {
 	fontFamily: "Arial",
 	fontSize: 40,
 	fill: 0xffffff
-})
+}, { chars: [['a', 'z'], ['0', '9'], ['A', 'Z'], ' \\|/.-^%$&*()!?']});
 
 const appParams = {
 	view: document.getElementById("pixi-canvas") as HTMLCanvasElement,
@@ -48,10 +48,18 @@ class App {
 		this.beginConnection();
 		this.startGame();
 	}
+
+	resetServer() {
+		this.networkManager.socket?.emit("resetServer");
+	}
 }
 
 const app: App = new App(appParams);
 
 (document.getElementById("start") as HTMLButtonElement).onclick = () => {
 	app.start();
+}
+
+(document.getElementById("reset") as HTMLButtonElement).onclick = () => {
+	app.resetServer();
 }

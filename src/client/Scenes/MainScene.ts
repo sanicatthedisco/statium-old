@@ -11,18 +11,11 @@ export class MainScene extends Scene {
 
     initializeCities(cityData: CityData[]) {
         cityData.forEach((city) => {
-            this.cities.push(new City(city.x, city.y, this, city.id, city.ownerId, city.ownerSlot));
+            console.log("Cities:");
+            console.log(this.cities);
+            this.cities.push(new City(city.x, city.y, this, city.id, city.ownerId));
         });
     }
-    updateCity(cityData: CityData) {
-        let matchingCity = this.cities.find((city) => {return city.id == cityData.id});
-        if (matchingCity == undefined) {
-            console.log("A city has not been synced properly.")
-        } else {
-            matchingCity.updateSelf(cityData.ownerId, cityData.ownerSlot, cityData.x, cityData.y, cityData.troopCount);
-        }
-    }
-
     issueCommand(origin: City, destination: City, troopSendNumber: number) {
         origin.commandToSendTroops(troopSendNumber, destination);
         let command: Command = {

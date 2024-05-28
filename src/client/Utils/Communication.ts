@@ -31,7 +31,7 @@ export interface Client {
 
 export interface GameState {
     cityDataList: CityData[];
-    troopDataList: TroopData[];
+    troopDataList?: TroopData[]; // might get rid of
     creationTime: number;
 }
 

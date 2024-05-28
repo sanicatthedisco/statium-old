@@ -15,6 +15,9 @@ export default class ServerTroopRepresentation {
     position: Vector2;
 
     destination: ServerCityRepresentation;
+    destroyMe = false;
+
+    debugTicker = 0;
 
     constructor(position: Vector2, destination: ServerCityRepresentation, ownerId: string) {
         this.ownerId = ownerId;
@@ -33,6 +36,11 @@ export default class ServerTroopRepresentation {
         let movementVector = Vector2.Multiply(this.dirVector.norm(), Params.troopSpeed * deltaTime);
         this.position.moveBy(movementVector);
 
+        this.debugTicker += deltaTime;
+        if (this.debugTicker > 100) {
+            this.debugTicker = 0;
+        }
+
         // Check if intersected target along the way
         if (this.dirVector.magnitude() < Params.cityRadius) {
             this.destination.interactWithTroop(this.ownerId);
@@ -41,7 +49,7 @@ export default class ServerTroopRepresentation {
     }
 
     destroy() {
-        // TODO
+        this.destroyMe = true;
     }
 
     toTroopData(): TroopData {

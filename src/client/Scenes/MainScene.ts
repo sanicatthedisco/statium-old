@@ -38,11 +38,13 @@ export class MainScene extends Scene {
     // A bunch of spaghetti. Controls which cities are selected
     // as the origin and destination for a troop movement
     // and if both are selected, initiates movement,
-    // then deselects them.s
+    // then deselects them.
     override manageSelection(city: City, e: FederatedPointerEvent) {
         if (this.originSelection === undefined) {
-            this.originSelection = city;
-            city.selectAs("origin");
+            if (city.ownerId == this.sceneManager?.networkManager.socket?.id) {
+                this.originSelection = city;
+                city.selectAs("origin");
+            }
         } else {
             if (this.originSelection == city) {
                 this.originSelection = undefined;

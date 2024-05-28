@@ -32,6 +32,9 @@ export class SceneManager {
                 } else {
                     matchingCity.setTroopCount(cityData.troopCount);
                     matchingCity.setOwner(cityData.ownerId);
+                    matchingCity.troopSendNumber = cityData.troopSendNumber;
+                    matchingCity.destination = (this.activeScene as MainScene).cities
+                                                    .find((city) => (city.id==cityData.destinationId));
                 }
             });
         } else {

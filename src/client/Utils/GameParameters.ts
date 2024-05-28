@@ -1,17 +1,18 @@
 export const GameParameters = 
 {
     // Networking params
-    serverClientUpdateInterval: 200,
+    serverClientUpdateInterval: 50,
+    simulationStepInterval: 10,
     
     // Troops
-    troopSpeed: 3,
+    troopSpeed: 4,
     troopRadius: 10,
 
     // Troop spawning
     troopSpawnInterval: 100,
     maxTroopCount: 99,
     maxTroopCountUnowned: 20,
-    troopIncreaseInterval: 200,
+    troopIncreaseInterval: 400,
     damageRecoveryTime: 500,
 
     // Cities

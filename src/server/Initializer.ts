@@ -6,6 +6,7 @@ import { CityData, Client } from "../client/Utils/Communication";
 import { Vector2 } from "../client/Utils/Vector2";
 import { App } from ".";
 import { GameParameters as Params } from "../client/Utils/GameParameters";
+import ServerCityRepresentation from "./GameObjectRepresentations/ServerCityRepresentation";
 
 export default class Initializer {
     server?: http.Server;
@@ -40,23 +41,24 @@ export default class Initializer {
         });
 
         this.app.io.emit("clientUpdate", this.app.clients);
-        socket.emit("initializeWorld", this.app.cityDataList);
+        let cityDataList = this.app.simulator.getGameState().cityDataList;
+        socket.emit("initializeWorld", cityDataList);
 
         // Give this client a starting city and let everyone know
         // Find a city which isn't taken already
-        let clientAssignedCity: CityData;
+        let clientAssignedCity: ServerCityRepresentation;
         do {
-            clientAssignedCity = this.randomChoice(this.app.cityDataList);
+            clientAssignedCity = this.randomChoice(this.app.simulator.cities);
         } while (clientAssignedCity.ownerId != undefined)
         clientAssignedCity.ownerId = socket.id;
         clientAssignedCity.troopCount += 20;
     }
 
-    cityIntersectsOther(cityToCheck: CityData) {
+    cityIntersectsOther(cityToCheck: CityData, cities: CityData[]) {
         let intersects = false;
 
-        this.app.cityDataList.forEach((city) => {
-          if (cityToCheck != city) {
+        cities.forEach((city) => {
+          if (cityToCheck.id != city.id) {
             let dist = Vector2.Subtract(new Vector2(cityToCheck.x, cityToCheck.y), 
                                         new Vector2(city.x, city.y)).magnitude();
             if (dist < Params.cityRadius + Params.cityMargin) {
@@ -80,7 +82,7 @@ export default class Initializer {
             let y = Math.random() * 420 + 10;
             city = {id: i, x: x, y: y, ownerId: undefined, troopCount: 1, troopSendNumber: 0, 
                 destinationId: undefined};
-            } while (this.cityIntersectsOther(city))
+            } while (this.cityIntersectsOther(city, cities))
             
             // Once it's been found, add this city to the list of cities
             cities.push(city)

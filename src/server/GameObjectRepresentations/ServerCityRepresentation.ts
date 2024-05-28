@@ -2,6 +2,8 @@ import { Vector2 } from "../../client/Utils/Vector2";
 import ServerTroopRepresentation from "./ServerTroopRepresentation";
 import { GameParameters as Params } from "../../client/Utils/GameParameters";
 import { CityData } from "../../client/Utils/Communication";
+import { Server } from "socket.io";
+import { GameSimulator } from "../Simulator";
 
 export default class ServerCityRepresentation {
     position: Vector2;
@@ -17,10 +19,13 @@ export default class ServerCityRepresentation {
     lastTroopDamageTime?: number;
     destination?: ServerCityRepresentation;
 
-    constructor(id: number, position: Vector2, ownerId?: string) {
+	simulator: GameSimulator;
+
+    constructor(id: number, position: Vector2, simulator: GameSimulator, ownerId?: string,) {
         this.position = position;
         this.id = id;
         this.ownerId = ownerId;
+		this.simulator = simulator;
     }
 
     update(deltaTime: number) {
@@ -53,7 +58,8 @@ export default class ServerCityRepresentation {
 		&& this.ownerId && this.destination) { // Sanity check that we have an owner and a destination
 				
 			// Spawn the troop and update the relevant counters
-			new ServerTroopRepresentation(this.position, this.destination, this.ownerId);
+			this.simulator.troops.push(new ServerTroopRepresentation(this.position, 
+				this.destination, this.ownerId));
 
 			this.changeTroopCountBy(-1);
 			this.lastSpawnTime = now;
@@ -81,15 +87,12 @@ export default class ServerCityRepresentation {
 			this.ownerIdOfLastDamagingTroop = troopOwnerId;
 
 			this.changeTroopCountBy(-1);
-			// TODO: handle ownership change
 
-			/*else {
-				if (!this.scene.sceneManager) throw new Error("Scenemanager is undefined!");
-				else {
-					this.ownerId = troopOwnerId;
-					this.ownerSlot = this.scene.sceneManager.networkManager.getClientSlot(troopOwnerId);
-				}
-			}*/
+			// change owner
+			if (this.troopCount <= 0) {
+				this.ownerId = troopOwnerId;
+				this.troopSendNumber = 0;
+			}
 		}
 	}
 
@@ -103,6 +106,17 @@ export default class ServerCityRepresentation {
 		}
 	}
 	changeTroopCountBy = (delta: number) => {this.setTroopCount(this.troopCount + delta)};
+
+    // Data management and interchange
+
+    static fromCityData(cd: CityData, sim: GameSimulator): ServerCityRepresentation {
+        let city = new ServerCityRepresentation(cd.id, new Vector2(cd.x, cd.y), sim, cd.ownerId);
+        city.troopCount = cd.troopCount;
+        city.troopSendNumber = cd.troopSendNumber;
+        // ...might need to add more of these
+
+        return city;
+    }
 
     toCityData(): CityData {
         return {

@@ -20,6 +20,11 @@ export class Vector2 {
 	setX(x: number) { this.x = x; }
 	setY(y: number) { this.y = y; }
 
+	moveBy(delta: Vector2) {
+		this.setX(this.x + delta.x);
+		this.setY(this.y + delta.y);
+	}
+
 	magnitude() {
 		return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2));
 	}

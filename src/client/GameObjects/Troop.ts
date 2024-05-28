@@ -4,14 +4,11 @@ import { Vector2 } from '../Utils/Vector2';
 import { Scene } from '../Scenes/Scene';
 import { City } from './City';
 import { CityData } from '../Utils/Communication';
+import { GameParameters as Params } from '../Utils/GameParameters';
 
 export class Troop extends GameObject {
-	static radius: number = 10;
-	static troopSpeed: number = 3;
-
 	destination: City;
 	dirVector: Vector2;
-	speed: number;
 	ownerId: string;
 
 	constructor(x: number, y: number, destination: City, scene: Scene, ownerId: string) {
@@ -20,19 +17,17 @@ export class Troop extends GameObject {
 		this.destination = destination;
 		this.ownerId = ownerId;
 
-		this.graphics.beginFill(City.playerColors[0]);
-		this.graphics.drawCircle(0, 0, Troop.radius);
+		this.graphics.beginFill(Params.playerColors[0]);
+		this.graphics.drawCircle(0, 0, Params.troopRadius);
 		this.graphics.endFill();
 		this.zIndex = 0;
 
 		this.dirVector = new Vector2(0, 0);
-
-		this.speed = Troop.troopSpeed;
 	}
 
 	override update(deltaTime: number) {
 		this.dirVector = Vector2.Subtract(this.destination.pos(), this.pos());
-		this.move(Vector2.Multiply(this.dirVector.norm(), this.speed * deltaTime));
+		this.move(Vector2.Multiply(this.dirVector.norm(), Params.troopSpeed * deltaTime));
 
 		if (this.dirVector.magnitude() < 20) {
 			this.destination.interactWithTroop(this.ownerId);

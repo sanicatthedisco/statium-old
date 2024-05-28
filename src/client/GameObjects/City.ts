@@ -7,21 +7,10 @@ import { GameParameters as Params } from '../Utils/GameParameters';
 //import { ServerCity } from '../../server';
 
 export class City extends GameObject {
-	static maxTroopCount: number = 99;
-	static radius = 20;
-
-	static originHighlightColor: number = 0x0000aa;
-	static destinationHighlightColor: number = 0xaa0000;
-	static highlightThickness: number = 5;
-
-	static playerColors: number[] = [0x2ba9b4, 0xe39aac, 0x93d4b5, 0xf0dab1];
-	static defaultColor: number = 0x888888;
-
 	text: BitmapText;
 	color: number;
-	troopCount: number = 10;
+	troopCount: number = Params.defaultTroopQuantity;
 	troopIncreaseTicker: number = 0;
-	radius: number;
 	ownerId?: string;
 	id: number;
 
@@ -38,8 +27,7 @@ export class City extends GameObject {
 		this.id = id;
 		this.ownerId = ownerId;
 
-		this.color = City.defaultColor;
-		this.radius = 20;
+		this.color = Params.defaultCityColor;
 
 		this.setOwner(ownerId);
 
@@ -155,17 +143,17 @@ export class City extends GameObject {
 
 		let newSlot: number | undefined;
 		if (!newOwnerId) {
-			this.color = City.defaultColor;
+			this.color = Params.defaultCityColor;
 		} else {
 			if (!this.scene.sceneManager) throw new Error("No scene manager set");
 			else newSlot = this.scene.sceneManager.networkManager.getClientSlot(newOwnerId!);
 
 			if (!newSlot) throw new Error("This client has no slot!");
-			this.color = City.playerColors[newSlot];
+			this.color = Params.playerColors[newSlot];
 		}
 
 		this.graphics.beginFill(this.color);
-		this.graphics.drawCircle(0, 0, this.radius);
+		this.graphics.drawCircle(0, 0, Params.cityRadius);
 		this.graphics.endFill();
 	}
 
@@ -205,19 +193,19 @@ export class City extends GameObject {
 		this.graphics.clear();
 
 		if (type == "origin") {
-			this.graphics.beginFill(City.originHighlightColor);
-			this.graphics.drawCircle(0, 0, this.radius + City.highlightThickness);
+			this.graphics.beginFill(Params.originHighlightColor);
+			this.graphics.drawCircle(0, 0, Params.cityRadius + Params.highlightThickness);
 			this.graphics.endFill();
 		} else if (type == "destination") {
-			this.graphics.beginFill(City.destinationHighlightColor);
-			this.graphics.drawCircle(0, 0, this.radius + City.highlightThickness);
+			this.graphics.beginFill(Params.destinationHighlightColor);
+			this.graphics.drawCircle(0, 0, Params.cityRadius + Params.highlightThickness);
 			this.graphics.endFill();
 		} else if (type != "none") {
 			throw "Not a valid selection type.";
 		}
 
 		this.graphics.beginFill(this.color);
-		this.graphics.drawCircle(0, 0, this.radius);
+		this.graphics.drawCircle(0, 0, Params.cityRadius);
 		this.graphics.endFill();
 	}
 

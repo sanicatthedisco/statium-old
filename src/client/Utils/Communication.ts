@@ -1,3 +1,5 @@
+import { Vector2 } from "./Vector2";
+
 export interface CityData {
     id: number;
     x: number;
@@ -10,6 +12,16 @@ export interface CityData {
     lastTroopIncreaseTime?: number;
     lastTroopDamageTime?: number;
     ownerIdOfLastDamagingTroop?: string;
+    lastSentTroop?: TroopData;
+}
+
+export interface TroopData {
+    destinationId: number;
+    dirVector: Vector2;
+    ownerId: string;
+    creationTime: number;
+    x: number;
+    y: number;
 }
 
 export interface Client {
@@ -19,6 +31,7 @@ export interface Client {
 
 export interface GameState {
     cityDataList: CityData[];
+    troopDataList: TroopData[];
     creationTime: number;
 }
 

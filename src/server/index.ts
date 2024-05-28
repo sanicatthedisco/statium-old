@@ -57,6 +57,7 @@ export class App {
 
         let gameState: GameState = {
             cityDataList: this.cityDataList,
+            troopDataList: [],
             creationTime: Date.now(),
         };
         this.io.emit("updateGameState", gameState);

@@ -8,7 +8,13 @@ import { GameParameters as Params } from '../client/Utils/GameParameters';
 import Initializer from './Initializer';
 import { GameSimulator } from './Simulator';
 
-const port: number = 3000;
+const port: number = +(process.env.PORT || 5001);
+
+let prod = false;
+if (process.argv[2] == "--prod") {
+    prod = true;
+    console.log("Running server in production mode");
+}
 
 export class App {
     port: number;
@@ -22,7 +28,7 @@ export class App {
 
     constructor(port: number) {
         this.port = port;
-        this.initializer = new Initializer(this);
+        this.initializer = new Initializer(this, prod);
 
         // Start server
         this.io = this.initializer.initServer();

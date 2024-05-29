@@ -12,9 +12,12 @@ export default class Initializer {
     server?: http.Server;
     currentHighestSlot: number = 0;
     app: App;
+    clientIndex: string = "../../client/index.html";
+    prodMode: boolean;
 
-    constructor(app: App) {
+    constructor(app: App, prod=false) {
         this.app = app;
+        this.prodMode = prod;
     }
 
     public Start() {
@@ -26,7 +29,9 @@ export default class Initializer {
 
     initServer(): Server {
         const app = express();
-        app.use(express.static(path.join(__dirname, 'dist/client')));
+        app.use(express.static(path.join(__dirname, '../../../dist/client')));
+        if (this.prodMode)
+            app.use((req, res) => res.sendFile(path.join(__dirname, "../../../dist/client/index.html")));
 
         this.server = http.createServer(app);
         return new Server(this.server)

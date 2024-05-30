@@ -4,7 +4,7 @@ import http from "http";
 import path from "path";
 import { CityData, Client } from "../client/Utils/Communication";
 import { Vector2 } from "../client/Utils/Vector2";
-import { App } from ".";
+import App from "./App";
 import { GameParameters as Params } from "../client/Utils/GameParameters";
 import ServerCityRepresentation from "./GameObjectRepresentations/ServerCityRepresentation";
 

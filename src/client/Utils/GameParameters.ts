@@ -1,5 +1,10 @@
 export const GameParameters = 
 {
+    // Overall apperance
+    width: 640,
+    height: 480,
+    backgroundColor: "#eee",
+
     // Networking params
     serverClientUpdateInterval: 50,
     simulationStepInterval: 10,

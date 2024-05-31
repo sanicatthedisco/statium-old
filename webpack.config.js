@@ -52,17 +52,17 @@ module.exports = {
               plugins: ["@babel/plugin-transform-object-assign"], // ensure compatibility with IE 11
             },
           },
-          exclude: /webpack-dev-server\/client\/modules\/logger/,
+          exclude: [/webpack-dev-server\/client\/modules\/logger/, /src\/server/],
         },
         {
           test: /\.js$/,
           loader: "webpack-remove-debug", // remove "debug" package
-          exclude: /webpack-dev-server\/client\/modules\/logger/,
+          exclude: [/webpack-dev-server\/client\/modules\/logger/, /src\/server/],
         },
         {
             test: /\.ts$/,
             loader: "ts-loader",
-            exclude: [/node-modules/, /src\/server/],
+            exclude: [/node-modules/],
         }
       ],
     },

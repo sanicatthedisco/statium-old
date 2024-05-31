@@ -38,6 +38,7 @@
     "webpack-remove-debug": "^0.1.0"
   },
   "dependencies": {
+    "@pixi/ui": "^1.1.1",
     "pixi.js": "^7.4.0"
   }
 }

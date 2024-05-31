@@ -3,6 +3,7 @@ import { Client, Command } from '../client/Utils/Communication';
 import { GameParameters as Params } from '../client/Utils/GameParameters';
 import Initializer from './Initializer';
 import { GameSimulator } from './Simulator';
+import Lobby from "./Lobby";
 
 export default class App {
     port: number;
@@ -13,6 +14,8 @@ export default class App {
     simulator: GameSimulator;
 
     pendingClientCommands: Command[] = [];
+
+    lobbies: Lobby[] = [];
 
     constructor(port: number, production=false) {
         this.port = port;
@@ -42,7 +45,20 @@ export default class App {
         console.log("Client with id " + socket.id.toString() + "has connected.");
         this.initializer.initializeClient(socket);
 
-        //socket.on("clientGameState", this.reconcileClientGameState.bind(this));
+        socket.on("requestLobbyCreation", (lobbyId: string) => {
+            let existingLobby = this.lobbies.find(
+                (lobby) => (lobby.id == lobbyId)
+            );
+            if (existingLobby) this.io.emit("lobbyCreationResult", {succeeded: true});
+            else {
+                socket.join(lobbyId);
+                this.lobbies.push(
+                    new Lobby(lobbyId, this)
+                );
+                this.io.emit("lobbyCreationResult", {succeeded: true});
+            }
+        });
+
         socket.on("pendingClientCommands", (commands) => {
             this.pendingClientCommands.push(...commands);
         });

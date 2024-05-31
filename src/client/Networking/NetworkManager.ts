@@ -4,6 +4,7 @@ import { MainScene } from "../Scenes/MainScene";
 import { CityData, Client, Command, GameState } from "../Utils/Communication";
 import { City } from "../GameObjects/City";
 import { GameParameters as Params } from "../Utils/GameParameters";
+import NewGameMenuScene from "../Scenes/Menus/NewGameMenuScene";
 
 export class NetworkManager {
 	socket?: Socket;
@@ -19,6 +20,17 @@ export class NetworkManager {
 		});
 		this.socket.on("disconnect", () => {
 			console.log("Disconnected");
+		});
+
+		this.socket.on("lobbyCreationResult", (result) => {
+			if (result.succeeded) {
+				this.socket?.emit("requestGameStart");
+			} else {
+				if (!(this.sceneManager.activeScene instanceof NewGameMenuScene))
+					throw new Error("Should not be getting lobby creation result on this scene.");
+
+				(this.sceneManager.activeScene as NewGameMenuScene).fail();
+			}
 		});
 
 		this.socket.on("clientUpdate", (clients) => {
@@ -47,6 +59,10 @@ export class NetworkManager {
 			this.socket!.emit("pendingClientCommands", this.commandBuffer);
 			this.commandBuffer = [];
 		});
+	}
+
+	requestLobbyCreation(lobbyId: string) {
+		this.socket?.emit("requestLobbyCreation", lobbyId);
 	}
 
 	getGameState(): GameState {

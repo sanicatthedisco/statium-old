@@ -3,6 +3,8 @@ import { NetworkManager } from "./Networking/NetworkManager";
 import { SceneManager } from "./Scenes/SceneManager";
 import { io } from "socket.io-client";
 import { MainScene } from "./Scenes/MainScene";
+import { GameParameters as Params } from "./Utils/GameParameters";
+import MenuScene from "./Scenes/Menus/MenuScene";
 
 // Game stuff
 BitmapFont.from("TroopCountFont", {
@@ -15,10 +17,10 @@ const appParams = {
 	view: document.getElementById("pixi-canvas") as HTMLCanvasElement,
 	resolution: window.devicePixelRatio || 1,
 	autoDensity: true,
-	backgroundColor: "#eee",
-	width: 640,
-	height: 480
-}
+	backgroundColor: Params.backgroundColor,
+	width: Params.width,
+	height: Params.height,
+};
 
 class App {
 	networkManager: NetworkManager;
@@ -37,7 +39,7 @@ class App {
 	}
 
 	startGame() {
-		this.sceneManager.setScene(new MainScene());
+		this.sceneManager.setScene(new MenuScene());
 
 		Ticker.shared.add((deltaTime: number) => {
 			this.sceneManager.update(deltaTime);
@@ -45,21 +47,11 @@ class App {
 	}
 
 	start() {
-		this.beginConnection();
+		//this.beginConnection();
 		this.startGame();
-	}
-
-	resetServer() {
-		this.networkManager.socket?.emit("resetServer");
 	}
 }
 
 const app: App = new App(appParams);
 
-(document.getElementById("start") as HTMLButtonElement).onclick = () => {
-	app.start();
-}
-
-(document.getElementById("reset") as HTMLButtonElement).onclick = () => {
-	app.resetServer();
-}
+app.start();

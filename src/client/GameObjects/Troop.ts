@@ -10,6 +10,7 @@ export class Troop extends GameObject {
 	destination: City;
 	dirVector: Vector2;
 	ownerId: string;
+	color: number;
 
 	// debug
 	id?: number;
@@ -17,13 +18,15 @@ export class Troop extends GameObject {
 	initTime: number;
 	lastDirVector: Vector2;
 
-	constructor(x: number, y: number, destination: City, scene: Scene, ownerId: string, id?: number) {
+	constructor(x: number, y: number, destination: City, scene: Scene, 
+		ownerId: string, color: number, id?: number) {
 		super(x, y, scene);
 
 		this.destination = destination;
 		this.ownerId = ownerId;
-
-		this.graphics.beginFill(Params.playerColors[0]);
+		
+		this.color = color;
+		this.graphics.beginFill(this.color);
 		this.graphics.drawCircle(0, 0, Params.troopRadius);
 		this.graphics.endFill();
 		this.zIndex = 0;
@@ -31,7 +34,7 @@ export class Troop extends GameObject {
 		this.dirVector = new Vector2(0, 0);
 		this.lastDirVector = this.dirVector;
 		this.id = id;
-		this.initTime = Date.now();
+		this.initTime = Date.now()
 	}
 
 	override update(deltaTime: number) {

@@ -88,7 +88,7 @@ export class City extends GameObject {
 				
 			// Spawn the troop and update the relevant counters
 			this.highestTroopId ++;
-			new Troop(this.x, this.y, this.destination, this.scene, this.ownerId, this.highestTroopId);
+			new Troop(this.x, this.y, this.destination, this.scene, this.ownerId, this.color, this.highestTroopId);
 
 			this.changeTroopCountBy(-1);
 			this.lastSpawnTime = now;

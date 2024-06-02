@@ -5,6 +5,7 @@ import { GameParameters as Params } from "../../Utils/GameParameters";
 import { MainScene } from "../MainScene";
 import { StylizedButton, StylizedText } from "../../UI/UI";
 import NewGameMenuScene from "./NewGameMenuScene";
+import JoinGameMenuScene from "./JoinGameMenuScene";
 
 export default class MenuScene extends Scene {
     title: BitmapText;
@@ -43,5 +44,6 @@ export default class MenuScene extends Scene {
 
     joinExistingGame() {
         console.log("Joining exisiting game");
+        this.sceneManager?.setScene(new JoinGameMenuScene());
     }
 }

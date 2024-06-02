@@ -2,6 +2,7 @@ import { FederatedPointerEvent } from "pixi.js";
 import { Scene } from "./Scene";
 import { City } from "../GameObjects/City";
 import { CityData, Command, GameState } from "../Utils/Communication";
+import InGamePopupMenu from "../UI/InGamePopupMenu";
 
 export class MainScene extends Scene {
     originSelection: City | undefined = undefined;
@@ -9,10 +10,14 @@ export class MainScene extends Scene {
 
     cities: City[] = [];
 
+    constructor() {
+        super();
+
+        this.addChild(new InGamePopupMenu());
+    }
+
     initializeCities(cityData: CityData[]) {
         cityData.forEach((city) => {
-            console.log("Cities:");
-            console.log(this.cities);
             this.cities.push(new City(city.x, city.y, this, city.id, city.ownerId));
         });
     }

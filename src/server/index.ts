@@ -8,4 +8,4 @@ if (process.argv[2] == "--prod") {
     console.log("Running server in production mode");
 }
 
-new App(port).initializer.Start();
+new App(port).Start();

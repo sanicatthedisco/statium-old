@@ -27,10 +27,10 @@ export class StylizedButton extends ButtonContainer {
     graphics: Graphics;
     w: number;
     h: number;
-    text: string;
-    bitmapText: BitmapText;
+    text: string | null;
+    bitmapText?: BitmapText;
 
-    constructor(text: string, x: number, y: number, width: number, height: number, 
+    constructor(text: string | null, x: number, y: number, width: number, height: number, 
         onPressCallback=()=>{}) {
         
         super();
@@ -38,20 +38,25 @@ export class StylizedButton extends ButtonContainer {
         this.y = y;
         this.w = width;
         this.h = height;
+
         this.text = text;
 
         this.graphics = new Graphics();
-        this.bitmapText = new BitmapText(this.text, {
-                fontName: "TroopCountFont",
-                fontSize: 25,
-                align: "center"
-        })
-        this.bitmapText.anchor.set(0.5, 0.5);
-        this.bitmapText.roundPixels = true;
+        
+        if (this.text) {
+            this.bitmapText = new BitmapText(this.text, {
+                    fontName: "TroopCountFont",
+                    fontSize: 25,
+                    align: "center"
+            });
+            this.bitmapText.anchor.set(0.5, 0.5);
+            this.bitmapText.roundPixels = true;
+        }
+        
 
         this.draw();
         this.addChild(this.graphics);
-        this.addChild(this.bitmapText);
+        if (this.bitmapText) this.addChild(this.bitmapText);
 
         this.onHover.connect(() => {
             this.color = StylizedButton.colors.hover;
@@ -85,14 +90,14 @@ export class StylizedInputFactory {
     color: number = 0xcccccc;
     textColor: number = 0xffffff;
 
-    buildInput(x: number, y: number, w: number, h: number) {
+    buildInput(placeholder: string, x: number, y: number, w: number, h: number) {
         let graphics = new Graphics().beginFill(this.color);
         graphics.drawRoundedRect(0, 0, w, h, 5);
         graphics.endFill();
 
         let i = new Input({
             bg: graphics,
-            placeholder: "Enter new room ID",
+            placeholder: placeholder,
             padding: 0,
             align: "center",
             textStyle: {fill: this.textColor}

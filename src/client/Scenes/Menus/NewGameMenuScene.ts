@@ -18,7 +18,7 @@ export default class NewGameMenuScene extends Scene {
             )
         );
 
-        this.input = (new StylizedInputFactory()).buildInput(Params.width/2, 200, 300, 50)
+        this.input = (new StylizedInputFactory()).buildInput("Enter a new room ID", Params.width/2, 200, 300, 50)
         this.addChild(this.input);
 
         this.addChild(
@@ -26,7 +26,8 @@ export default class NewGameMenuScene extends Scene {
                 Params.width/2, 270,
                 100, 50, 
                 () => {
-                    this.sceneManager?.setScene(new MainScene());
+                    //TODO: sanitize
+                    this.sceneManager?.networkManager.requestLobbyCreation(this.input.value);
                 }
             )
         );

@@ -3,75 +3,67 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const GameParameters_1 = require("../client/Utils/GameParameters");
-const Initializer_1 = __importDefault(require("./Initializer"));
-const Simulator_1 = require("./Simulator");
+const socket_io_1 = require("socket.io");
+const Lobby_1 = __importDefault(require("./Lobby"));
+const express_1 = __importDefault(require("express"));
+const http_1 = __importDefault(require("http"));
+const path_1 = __importDefault(require("path"));
 class App {
     constructor(port, production = false) {
-        this.clients = [];
-        this.pendingClientCommands = [];
+        this.lobbies = [];
+        this.currentHighestSlot = 0;
+        this.clientIndex = "../../client/index.html";
         this.port = port;
-        this.initializer = new Initializer_1.default(this, production);
+        this.production = production;
         // Start server
-        this.io = this.initializer.initServer();
-        // Set up world
-        let cdl = this.initializer.generateCities(GameParameters_1.GameParameters.numberOfCities);
-        this.simulator = new Simulator_1.GameSimulator(cdl);
-        // Start client update loop
-        setInterval(this.updateClientsWithGameState.bind(this), GameParameters_1.GameParameters.serverClientUpdateInterval);
-        // Start game state simulation loop
-        setInterval(() => {
-            this.simulator.stepForwardTo(Date.now());
-        }, GameParameters_1.GameParameters.simulationStepInterval);
-        console.log("Game state simulation started");
+        this.io = this.initServer();
         this.io.on("connection", this.handleConnection.bind(this));
     }
     handleConnection(socket) {
         console.log("Client with id " + socket.id.toString() + "has connected.");
-        this.initializer.initializeClient(socket);
-        //socket.on("clientGameState", this.reconcileClientGameState.bind(this));
-        socket.on("pendingClientCommands", (commands) => {
-            this.pendingClientCommands.push(...commands);
+        socket.on("requestLobbyCreation", (lobbyId) => {
+            let existingLobby = this.lobbies.find((lobby) => (lobby.id == lobbyId));
+            if (existingLobby)
+                socket.emit("lobbyCreationResult", { succeeded: false });
+            else {
+                socket.join(lobbyId);
+                socket.emit("lobbyCreationResult", { succeeded: true });
+                this.lobbies.push(new Lobby_1.default(lobbyId, this).handleConnection(socket, true));
+            }
         });
-        // Dev mode only ofc
-        socket.on("resetServer", () => {
-            //TODO
-            console.log("Not set up yet");
+        socket.on("requestLobbyJoin", (lobbyId) => {
+            let existingLobby = this.lobbies.find((lobby) => (lobby.id == lobbyId));
+            if (!existingLobby)
+                socket.emit("lobbyJoinResult", { succeeded: false });
+            else {
+                socket.join(lobbyId);
+                socket.emit("lobbyCreationResult", { succeeded: true });
+                existingLobby.handleConnection(socket);
+            }
         });
         socket.on("disconnect", () => {
             console.log("Client with id " + socket.id.toString() + "has disconnected.");
         });
     }
-    // Core loop to send game state info to clients
-    updateClientsWithGameState() {
-        this.reconcileClientCommands(this.pendingClientCommands);
-        this.pendingClientCommands = [];
-        this.io.emit("updateGameState", this.simulator.getGameState());
-    }
-    reconcileClientCommands(clientCommands) {
-        // Directly modifies server's game state with client's commands from last loop
-        // No protection for now
-        clientCommands.forEach((command) => {
-            // Need some kind of validation here
-            let origin = this.simulator.cities.find((city) => (city.id == command.originId));
-            if (!origin)
-                throw new Error("Command contains nonexistent city id!");
-            origin.troopSendNumber = command.troopCount;
-            let destination = this.simulator.cities.find((city) => (city.id == command.destinationId));
-            if (!destination)
-                throw new Error("Command contains nonexistent destination id!");
-            origin.destination = destination;
+    Start() {
+        if (!this.server)
+            throw new Error("Server has not been initialized!");
+        this.server.listen(this.port, () => {
+            console.log("Server listening on port " + this.port);
         });
     }
-    getSlotOfClient(clientId) {
-        let correspondingClient = this.clients.find((client) => {
-            return client.id == clientId;
-        });
-        if (correspondingClient)
-            return correspondingClient.slot;
-        else
-            throw new Error("No client exists with that id!");
+    initServer() {
+        const app = (0, express_1.default)();
+        app.use(express_1.default.static(path_1.default.join(__dirname, '../../../dist/client')));
+        if (this.production)
+            app.use((req, res) => res.sendFile(path_1.default.join(__dirname, "../../../dist/client/index.html")));
+        this.server = http_1.default.createServer(app);
+        return new socket_io_1.Server(this.server);
+    }
+    destroyLobby(id) {
+        this.io.socketsLeave(id);
+        this.lobbies.splice(this.lobbies.findIndex((l) => (l.id == id)), 1);
     }
 }
 exports.default = App;
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQXBwLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3NlcnZlci9BcHAudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFFQSxtRUFBMEU7QUFDMUUsZ0VBQXdDO0FBQ3hDLDJDQUE0QztBQUc1QyxNQUFxQixHQUFHO0lBWXBCLFlBQVksSUFBWSxFQUFFLFVBQVUsR0FBQyxLQUFLO1FBUjFDLFlBQU8sR0FBYSxFQUFFLENBQUM7UUFJdkIsMEJBQXFCLEdBQWMsRUFBRSxDQUFDO1FBS2xDLElBQUksQ0FBQyxJQUFJLEdBQUcsSUFBSSxDQUFDO1FBQ2pCLElBQUksQ0FBQyxXQUFXLEdBQUcsSUFBSSxxQkFBVyxDQUFDLElBQUksRUFBRSxVQUFVLENBQUMsQ0FBQztRQUVyRCxlQUFlO1FBQ2YsSUFBSSxDQUFDLEVBQUUsR0FBRyxJQUFJLENBQUMsV0FBVyxDQUFDLFVBQVUsRUFBRSxDQUFDO1FBRXhDLGVBQWU7UUFDZixJQUFJLEdBQUcsR0FBRyxJQUFJLENBQUMsV0FBVyxDQUFDLGNBQWMsQ0FBQywrQkFBTSxDQUFDLGNBQWMsQ0FBQyxDQUFDO1FBQ2pFLElBQUksQ0FBQyxTQUFTLEdBQUcsSUFBSSx5QkFBYSxDQUFDLEdBQUcsQ0FBQyxDQUFDO1FBRXhDLDJCQUEyQjtRQUMzQixXQUFXLENBQUMsSUFBSSxDQUFDLDBCQUEwQixDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsRUFBRSwrQkFBTSxDQUFDLDBCQUEwQixDQUFDLENBQUM7UUFFM0YsbUNBQW1DO1FBQ25DLFdBQVcsQ0FBQyxHQUFHLEVBQUU7WUFDYixJQUFJLENBQUMsU0FBUyxDQUFDLGFBQWEsQ0FBQyxJQUFJLENBQUMsR0FBRyxFQUFFLENBQUMsQ0FBQztRQUM3QyxDQUFDLEVBQUUsK0JBQU0sQ0FBQyxzQkFBc0IsQ0FBQyxDQUFDO1FBRWxDLE9BQU8sQ0FBQyxHQUFHLENBQUMsK0JBQStCLENBQUMsQ0FBQztRQUU3QyxJQUFJLENBQUMsRUFBRSxDQUFDLEVB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
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiQXBwLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vLi4vc3JjL3NlcnZlci9BcHAudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7Ozs7QUFBQSx5Q0FBMkM7QUFHM0Msb0RBQTRCO0FBQzVCLHNEQUE4QjtBQUM5QixnREFBd0I7QUFDeEIsZ0RBQXdCO0FBRXhCLE1BQXFCLEdBQUc7SUFhcEIsWUFBWSxJQUFZLEVBQUUsVUFBVSxHQUFDLEtBQUs7UUFSMUMsWUFBTyxHQUFZLEVBQUUsQ0FBQztRQUd0Qix1QkFBa0IsR0FBVyxDQUFDLENBQUM7UUFDL0IsZ0JBQVcsR0FBVyx5QkFBeUIsQ0FBQztRQUs1QyxJQUFJLENBQUMsSUFBSSxHQUFHLElBQUksQ0FBQztRQUNqQixJQUFJLENBQUMsVUFBVSxHQUFHLFVBQVUsQ0FBQztRQUU3QixlQUFlO1FBQ2YsSUFBSSxDQUFDLEVBQUUsR0FBRyxJQUFJLENBQUMsVUFBVSxFQUFFLENBQUM7UUFFNUIsSUFBSSxDQUFDLEVBQUUsQ0FBQyxFQUFFLENBQUMsWUFBWSxFQUFFLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQztJQUMvRCxDQUFDO0lBRUQsZ0JBQWdCLENBQUMsTUFBYztRQUMzQixPQUFPLENBQUMsR0FBRyxDQUFDLGlCQUFpQixHQUFHLE1BQU0sQ0FBQyxFQUFFLENBQUMsUUFBUSxFQUFFLEdBQUcsZ0JBQWdCLENBQUMsQ0FBQztRQUV6RSxNQUFNLENBQUMsRUFBRSxDQUFDLHNCQUFzQixFQUFFLENBQUMsT0FBZSxFQUFFLEVBQUU7WUFDbEQsSUFBSSxhQUFhLEdBQUcsSUFBSSxDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQ2pDLENBQUMsS0FBSyxFQUFFLEVBQUUsQ0FBQyxDQUFDLEtBQUssQ0FBQyxFQUFFLElBQUksT0FBTyxDQUFDLENBQ25DLENBQUM7WUFDRixJQUFJLGFBQWE7Z0JBQUUsTUFBTSxDQUFDLElBQUksQ0FBQyxxQkFBcUIsRUFB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

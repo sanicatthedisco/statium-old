@@ -5,6 +5,7 @@ import { CityData, Client, Command, GameState } from "../Utils/Communication";
 import { City } from "../GameObjects/City";
 import { GameParameters as Params } from "../Utils/GameParameters";
 import NewGameMenuScene from "../Scenes/Menus/NewGameMenuScene";
+import JoinGameMenuScene from "../Scenes/Menus/JoinGameMenuScene";
 
 export class NetworkManager {
 	socket?: Socket;
@@ -24,7 +25,7 @@ export class NetworkManager {
 
 		this.socket.on("lobbyCreationResult", (result) => {
 			if (result.succeeded) {
-				this.socket?.emit("requestGameStart");
+				this.sceneManager.setScene(new MainScene());
 			} else {
 				if (!(this.sceneManager.activeScene instanceof NewGameMenuScene))
 					throw new Error("Should not be getting lobby creation result on this scene.");
@@ -32,10 +33,19 @@ export class NetworkManager {
 				(this.sceneManager.activeScene as NewGameMenuScene).fail();
 			}
 		});
+		this.socket.on("lobbyJoinResult", (result) => {
+			if (result.succeeded) {
+				this.sceneManager.setScene(new MainScene());
+			} else {
+				if (!(this.sceneManager.activeScene instanceof JoinGameMenuScene))
+					throw new Error("Should not be getting lobby join result on this scene.");
+
+				(this.sceneManager.activeScene as JoinGameMenuScene).fail();
+			}
+		})
 
 		this.socket.on("clientUpdate", (clients) => {
 			this.clients = clients;
-			console.log(this.clients);
 		});
 
 		this.socket.on("initializeWorld", (cityData) => {
@@ -63,6 +73,9 @@ export class NetworkManager {
 
 	requestLobbyCreation(lobbyId: string) {
 		this.socket?.emit("requestLobbyCreation", lobbyId);
+	}
+	requestLobbyJoin(lobbyId: string) {
+		this.socket?.emit("requestLobbyJoin", lobbyId);
 	}
 
 	getGameState(): GameState {

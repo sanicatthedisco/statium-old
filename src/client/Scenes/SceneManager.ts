@@ -25,9 +25,6 @@ export class SceneManager {
                 );
 
                 if (matchingCity == undefined) {
-                    
-                    console.log(gameState.cityDataList);
-                    console.log((this.activeScene as MainScene).cities);
                     throw new Error("A city has not been synced properly");
                 } else {
                     matchingCity.setTroopCount(cityData.troopCount);

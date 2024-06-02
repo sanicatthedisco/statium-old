@@ -31,7 +31,7 @@ module.exports = {
         proxy: [
           {
             context: "/socket.io",
-            target: "http://127.0.0.1:3000"
+            target: "http://127.0.0.1:5001"
           },
         ],
     },

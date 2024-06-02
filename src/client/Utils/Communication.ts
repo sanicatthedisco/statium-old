@@ -27,6 +27,7 @@ export interface TroopData {
 export interface Client {
     slot: number;
     id: string;
+    isOwner: boolean;
 }
 
 export interface GameState {

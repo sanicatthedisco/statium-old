@@ -21,6 +21,9 @@ export class City extends GameObject {
 	lastTroopDamageTime?: number;
 	ownerIdOfLastDamagingTroop?: string;
 
+	//debug
+	highestTroopId = 0;
+
 	constructor(x: number, y: number, scene: Scene, id: number, ownerId?: string, ownerSlot?: number) {
 		super(x, y, scene);
 
@@ -84,7 +87,8 @@ export class City extends GameObject {
 		&& this.ownerId && this.destination) { // Sanity check that we have an owner and a destination
 				
 			// Spawn the troop and update the relevant counters
-			new Troop(this.x, this.y, this.destination, this.scene, this.ownerId);
+			this.highestTroopId ++;
+			new Troop(this.x, this.y, this.destination, this.scene, this.ownerId, this.highestTroopId);
 
 			this.changeTroopCountBy(-1);
 			this.lastSpawnTime = now;

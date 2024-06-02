@@ -17,7 +17,11 @@ export default class ServerTroopRepresentation {
     destination: ServerCityRepresentation;
     destroyMe = false;
 
+    //debug
     debugTicker = 0;
+    lastTime: number = Date.now();
+    initTime: number;
+    lastDirVector: Vector2;
 
     constructor(position: Vector2, destination: ServerCityRepresentation, ownerId: string) {
         this.ownerId = ownerId;
@@ -29,17 +33,32 @@ export default class ServerTroopRepresentation {
         this.creationTime = Date.now();
 
         this.dirVector = Vector2.Subtract(this.destination.position, this.position);
+        this.initTime = Date.now();
+        this.lastDirVector = this.dirVector;
     }
 
     update(deltaTime: number) {
         this.dirVector = Vector2.Subtract(this.destination.position, this.position);
-        let movementVector = Vector2.Multiply(this.dirVector.norm(), Params.troopSpeed * deltaTime);
-        this.position.moveBy(movementVector);
+        let timeNow = Date.now();
+        let dt = timeNow - this.lastTime;
+        let movementVector = Vector2.Multiply(this.dirVector.norm(), Params.troopSpeed * dt);
+        this.position = Vector2.Add(this.position, movementVector);
+        this.lastTime = timeNow;
 
         this.debugTicker += deltaTime;
         if (this.debugTicker > 100) {
             this.debugTicker = 0;
         }
+
+        if (this.id == 1) {
+            /*
+            console.log(timeNow-this.initTime, 
+                (this.lastDirVector.magnitude() - this.dirVector.magnitude())/ dt,
+                this.lastDirVector.magnitude() - this.dirVector.magnitude(), dt,
+            this.dirVector.norm().magnitude());*/
+        }
+
+        this.lastDirVector = this.dirVector;
 
         // Check if intersected target along the way
         if (this.dirVector.magnitude() < Params.cityRadius) {

@@ -10,7 +10,7 @@ export const GameParameters =
     simulationStepInterval: 10,
     
     // Troops
-    troopSpeed: 4,
+    troopSpeed: 0.3,
     troopRadius: 10,
 
     // Troop spawning

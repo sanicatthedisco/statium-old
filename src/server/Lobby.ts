@@ -15,6 +15,8 @@ export default class Lobby {
     pendingClientCommands: Command[] = [];
     currentHighestSlot: number = 0;
 
+    lastPingTime: number = 0;
+
     timers: NodeJS.Timeout[] = [];
 
     constructor(id: string, app: App) {
@@ -61,6 +63,7 @@ export default class Lobby {
 
         // Socket event listeners
         socket.on("pendingClientCommands", (commands) => {
+            //console.log("Ping: " + (Date.now() - this.lastPingTime) + " ms");
             this.pendingClientCommands.push(...commands);
         });
 
@@ -124,6 +127,7 @@ export default class Lobby {
         this.pendingClientCommands = [];
         
         this.app.io.to(this.id).emit("updateGameState", this.simulator.getGameState());
+        this.lastPingTime = Date.now();
     }
 
 

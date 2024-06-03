@@ -12,11 +12,11 @@ export class MainScene extends Scene {
 
     constructor() {
         super();
-
-        this.addChild(new InGamePopupMenu());
     }
 
     initializeCities(cityData: CityData[]) {
+        if (!this.sceneManager) throw new Error("Scene manager has not been assigned");
+        this.addChild(new InGamePopupMenu(this.sceneManager));
         cityData.forEach((city) => {
             this.cities.push(new City(city.x, city.y, this, city.id, city.ownerId));
         });

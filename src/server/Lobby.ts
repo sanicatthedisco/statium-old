@@ -68,21 +68,32 @@ export default class Lobby {
         });
 
         socket.on("disconnect", () => {
-            if (this.clients.find(
-                (client) => (
-                    client.id == socket.id
-                    && client.isOwner
-                )
-            )) {
-                console.log("Lobby destroyed");
-                this.timers.forEach((timer) => {clearInterval(timer)});
-                socket.to(this.id).emit("lobbyDestroyed"); // Doesn't send to self
-                this.app.destroyLobby(this.id);
-            }
+            this.leaveLobby(socket);
+        });
+        socket.on("leaveLobby", () => {
+            this.leaveLobby(socket);
         });
 
         // For convenience return lobby object
         return this;
+    }
+
+    leaveLobby(socket: Socket) {
+        console.log("Client with id " + socket.id + " left lobby " + this.id);
+        socket.leave(this.id);
+
+        // If owner, destroy lobby
+        if (this.clients.find(
+            (client) => (
+                client.id == socket.id
+                && client.isOwner
+            )
+        )) {
+            console.log("Lobby destroyed");
+            this.timers.forEach((timer) => {clearInterval(timer)});
+            socket.to(this.id).emit("lobbyDestroyed"); // Doesn't send to self
+            this.app.destroyLobby(this.id);
+        }
     }
 
     generateCities(quantity: number): CityData[] {

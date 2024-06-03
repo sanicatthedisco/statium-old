@@ -3,6 +3,7 @@ import { NetworkManager } from "../Networking/NetworkManager";
 import { Scene } from "./Scene";
 import { GameState } from "../Utils/Communication";
 import { MainScene } from "./MainScene";
+import MenuScene from "./Menus/MenuScene";
 
 export class SceneManager {
     activeScene?: Scene;
@@ -13,6 +14,12 @@ export class SceneManager {
         this.stage = stage;
         this.networkManager = networkManager;
         this.networkManager.sceneManager = this;
+    }
+
+    leaveGame() {
+        if (!(this.activeScene instanceof MainScene)) throw new Error("Trying to leave although not in a game!");
+        this.setScene(new MenuScene());
+        this.networkManager.leaveLobby();
     }
 
     imposeGameState(gameState: GameState) {

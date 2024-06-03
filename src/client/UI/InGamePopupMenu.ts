@@ -1,14 +1,34 @@
 import { Container, Graphics } from "pixi.js";
 import { StylizedButton } from "./UI";
 import { GameParameters as Params } from "../Utils/GameParameters";
+import { SceneManager } from "../Scenes/SceneManager";
 
 export default class InGamePopupMenu extends Container {
     isOpen = false;
 
-    constructor() {
+    openButton: StylizedButton;
+    menuContainer: Container;
+    sm: SceneManager;
+
+    constructor(sm: SceneManager) {
         super();
-        
-        this.addChild(this.buildOpenButton());
+        this.sm = sm;
+
+        this.openButton = this.buildOpenButton();
+        this.menuContainer = this.buildPopupMenu();
+        this.addChild(this.openButton);
+
+        this.zIndex = 2;
+    }
+
+    open() {
+        this.removeChild(this.openButton);
+        this.addChild(this.menuContainer);
+    }
+
+    close() {
+        this.removeChild(this.menuContainer);
+        this.addChild(this.openButton);
     }
 
     buildOpenButton(): StylizedButton {
@@ -45,7 +65,40 @@ export default class InGamePopupMenu extends Container {
         return button;
     }
 
-    open() {
+    buildPopupMenu(): Container {
+        const color = 0xdddddd;
+        const margin = 50;
+        const container = new Container();
+        const gr = new Graphics();
+        gr.beginFill(color);
+        gr.drawRoundedRect(margin, margin, 
+                Params.width - margin*2, Params.height - margin*2, 5);
+        gr.endFill();
 
+        container.addChild(gr);
+        
+        container.addChild(
+            new StylizedButton(
+                "Return to game",
+                Params.width/2,Params.height/2 - 50,
+                300, 50,
+                () => {
+                    this.close();
+                }
+            )
+        );
+
+        container.addChild(
+            new StylizedButton(
+                "Leave game",
+                Params.width/2,Params.height/2 + 50,
+                300, 50,
+                () => {
+                    this.sm.leaveGame();
+                }
+            )
+        );
+
+        return container;
     }
 }

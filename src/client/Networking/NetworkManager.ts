@@ -58,17 +58,26 @@ export class NetworkManager {
 
 		// When the server sends us its game state to be imposed
 		this.socket.on("updateGameState", (serverGameState) => {
-			let reconciledGameStates = this.reconcileGameStates(serverGameState, this.getGameState());
-			this.sceneManager.imposeGameState(reconciledGameStates);
+			if (this.sceneManager.activeScene instanceof MainScene) {
+				let reconciledGameStates = this.reconcileGameStates(serverGameState, this.getGameState());
+				this.sceneManager.imposeGameState(reconciledGameStates);
 
-			this.socket!.emit("clientGameState", {
-				clientId: this.socket!.id, 
-				clientGameState: reconciledGameStates
-			});
+				this.socket!.emit("clientGameState", {
+					clientId: this.socket!.id, 
+					clientGameState: reconciledGameStates
+				});
 
-			this.socket!.emit("pendingClientCommands", this.commandBuffer);
-			this.commandBuffer = [];
+				this.socket!.emit("pendingClientCommands", this.commandBuffer);
+				this.commandBuffer = [];
+			} else {
+				console.warn("Game state is being updated by server but we are not in a game!");
+			}
 		});
+	}
+
+	leaveLobby() {
+		console.log("Leaving lobby");
+		this.socket?.emit("leaveLobby");
 	}
 
 	requestLobbyCreation(lobbyId: string) {

@@ -161,27 +161,6 @@ export class City extends GameObject {
 		this.graphics.endFill();
 	}
 
-	/*
-
-	updateSelf(cd: CityData) {
-		this.ownerId = cd.ownerId;
-		this.ownerSlot = cd.ownerSlot;
-		this.x = cd.x;
-		this.y = cd.y;
-		this.troopCount = cd.troopCount;
-
-		if (this.ownerSlot != undefined) {
-			this.color = City.playerColors[this.ownerSlot];
-		}
-
-		if (this.text) this.text.text = (this.troopCount < 0 ? "-" : "") + this.troopCount.toString();
-
-		this.graphics.beginFill(this.color);
-		this.graphics.drawCircle(0, 0, this.radius);
-		this.graphics.endFill();
-	}
-	*/
-
 	// User control
 
 	commandToSendTroops(quantity: number, destination: City) {

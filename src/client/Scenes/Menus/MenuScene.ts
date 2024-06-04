@@ -14,7 +14,7 @@ export default class MenuScene extends Scene {
 
         // UI
         // Title
-        this.title = new StylizedText("Statium", 35, 0x555555, Params.width/2, 75);
+        this.title = new StylizedText("Statium", 35, Params.titleColor, Params.width/2, 75);
         this.addChild(this.title);
 
         // Buttons

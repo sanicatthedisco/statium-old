@@ -5,6 +5,9 @@ export const GameParameters =
     height: 480,
     backgroundColor: "#eee",
 
+    // Menus
+    titleColor: 0x555555,
+
     // Networking params
     serverClientUpdateInterval: 50,
     simulationStepInterval: 10,

@@ -39,7 +39,7 @@ export class GameSimulator {
         this.simulationTime += deltaTime;
     }
     stepForwardTo(targetSimulationTime: number) {
-        if (targetSimulationTime - this.simulationTime <= 0)
+        if (targetSimulationTime - this.simulationTime <= 0 && this.simulationTime % 100 == 0)
             console.warn("Target simulation time is before or during most recent simulation time!");
         else
             this.stepForward(targetSimulationTime - this.simulationTime);

@@ -6,6 +6,7 @@ import { City } from "../GameObjects/City";
 import { GameParameters as Params } from "../Utils/GameParameters";
 import NewGameMenuScene from "../Scenes/Menus/NewGameMenuScene";
 import JoinGameMenuScene from "../Scenes/Menus/JoinGameMenuScene";
+import LobbyStagingScene from "../Scenes/Menus/LobbyStagingScene";
 
 export class NetworkManager {
 	socket?: Socket;
@@ -25,7 +26,7 @@ export class NetworkManager {
 
 		this.socket.on("lobbyCreationResult", (result) => {
 			if (result.succeeded) {
-				this.sceneManager.setScene(new MainScene());
+				this.sceneManager.setScene(new LobbyStagingScene(true));
 			} else {
 				if (!(this.sceneManager.activeScene instanceof NewGameMenuScene))
 					throw new Error("Should not be getting lobby creation result on this scene.");
@@ -35,7 +36,7 @@ export class NetworkManager {
 		});
 		this.socket.on("lobbyJoinResult", (result) => {
 			if (result.succeeded) {
-				this.sceneManager.setScene(new MainScene());
+				this.sceneManager.setScene(new LobbyStagingScene(false));
 			} else {
 				if (!(this.sceneManager.activeScene instanceof JoinGameMenuScene))
 					throw new Error("Should not be getting lobby join result on this scene.");
@@ -46,14 +47,14 @@ export class NetworkManager {
 
 		this.socket.on("clientUpdate", (clients) => {
 			this.clients = clients;
+			if (this.sceneManager.activeScene instanceof LobbyStagingScene) {
+				this.sceneManager.activeScene.updateClients(clients);
+			}
 		});
 
-		this.socket.on("initializeWorld", (cityData) => {
-			if (this.sceneManager.activeScene instanceof MainScene) {
-				this.sceneManager.activeScene.initializeCities(cityData);
-			} else {
-				throw new Error("World is being initialized but client does not have main scene loaded!");
-			}
+		this.socket.on("gameStart", (cityData) => {
+			this.sceneManager.setScene(new MainScene());
+			(this.sceneManager.activeScene as MainScene).initializeCities(cityData);
 		});
 
 		// When the server sends us its game state to be imposed
@@ -85,6 +86,10 @@ export class NetworkManager {
 	}
 	requestLobbyJoin(lobbyId: string) {
 		this.socket?.emit("requestLobbyJoin", lobbyId);
+	}
+
+	requestGameStart() {
+		this.socket?.emit("requestGameStart");
 	}
 
 	getGameState(): GameState {

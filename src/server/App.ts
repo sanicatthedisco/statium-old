@@ -52,7 +52,7 @@ export default class App {
             if (!existingLobby) socket.emit("lobbyJoinResult", {succeeded: false});
             else {
                 socket.join(lobbyId);
-                socket.emit("lobbyCreationResult", {succeeded: true});
+                socket.emit("lobbyJoinResult", {succeeded: true});
                 existingLobby.handleConnection(socket);
             }
         });

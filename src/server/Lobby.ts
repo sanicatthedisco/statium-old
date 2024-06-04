@@ -19,28 +19,24 @@ export default class Lobby {
 
     timers: NodeJS.Timeout[] = [];
 
+    listeners: {
+        socketId: string,
+        callback: (...args: any[]) => void, 
+        name: string
+    }[] = [];
+
     constructor(id: string, app: App) {
         this.app = app;
         this.id = id;
-
+        
         this.simulator = new GameSimulator(
             this.generateCities(Params.numberOfCities)
         );
-
-        // Start client update loop
-        this.timers.push(setInterval(
-            this.updateClientsWithGameState.bind(this), 
-            Params.serverClientUpdateInterval
-        ));
-
-        // Start game state simulation loop
-        this.timers.push(setInterval(() => {
-            this.simulator.stepForwardTo(Date.now());
-        }, Params.simulationStepInterval));
-        console.log("Game state simulation started");
     }
 
     handleConnection(socket: Socket, isOwner=false) {
+        console.log("New connection to lobby " + this.id + " by socket " + socket.id);
+
         // Initialize new client
         this.currentHighestSlot += 1;
         this.clients.push({
@@ -49,17 +45,6 @@ export default class Lobby {
             isOwner: isOwner
         });
         this.app.io.to(this.id).emit("clientUpdate", this.clients);
-        let cityDataList = this.simulator.getGameState().cityDataList;
-        socket.emit("initializeWorld", cityDataList);
-
-        // Give this client a starting city and let everyone know
-        // Find a city which isn't taken already
-        let clientAssignedCity: ServerCityRepresentation;
-        do {
-            clientAssignedCity = this.randomChoice(this.simulator.cities);
-        } while (clientAssignedCity.ownerId != undefined)
-        clientAssignedCity.ownerId = socket.id;
-        clientAssignedCity.troopCount += 20;
 
         // Socket event listeners
         socket.on("pendingClientCommands", (commands) => {
@@ -74,13 +59,51 @@ export default class Lobby {
             this.leaveLobby(socket);
         });
 
+        socket.on("requestGameStart", () => {
+            // TODO: needs validation
+            this.startGame(socket);
+
+        });
+
         // For convenience return lobby object
         return this;
+    }
+
+    startGame(socket: Socket) {
+        // Start client update loop
+        this.timers.push(setInterval(
+            this.updateClientsWithGameState.bind(this), 
+            Params.serverClientUpdateInterval
+        ));
+
+        // Start game state simulation loop
+        this.timers.push(setInterval(() => {
+            this.simulator.stepForwardTo(Date.now());
+        }, Params.simulationStepInterval));
+        console.log("Game state simulation started");
+
+        // Let everyone know the game is starting
+        let cityDataList = this.simulator.getGameState().cityDataList;
+        this.app.io.to(this.id).emit("gameStart", cityDataList);
+
+        // Give each client a starting city which isn't taken already
+        this.clients.forEach((client) => {
+            let clientAssignedCity: ServerCityRepresentation;
+            do {
+                clientAssignedCity = this.randomChoice(this.simulator.cities);
+            } while (clientAssignedCity.ownerId != undefined)
+            clientAssignedCity.ownerId = client.id;
+            clientAssignedCity.troopCount += 20;
+        })
     }
 
     leaveLobby(socket: Socket) {
         console.log("Client with id " + socket.id + " left lobby " + this.id);
         socket.leave(this.id);
+
+        socket.removeAllListeners("requestGameStart");
+        socket.removeAllListeners("leaveLobby");
+        socket.removeAllListeners("pendingClientCommands");
 
         // If owner, destroy lobby
         if (this.clients.find(

@@ -59,7 +59,8 @@ export class Region extends Container {
     }
 
     updateColor(cityColor: Color) {
-        this.color = cityColor.lighten(0.7);
+        this.color = cityColor.lightness(cityColor.l() * 1.2);
+        console.log(this.color.hex());
         this.draw();
     }
 }

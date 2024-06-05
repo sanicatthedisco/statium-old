@@ -171,6 +171,7 @@ export class City extends GameObject {
 
 		// Update region too
 		//if (!this.region) throw new Error("No region assigned");
+		console.log(newOwnerId, this.color.hex());
 		this.region?.updateColor(this.color);
 	}
 

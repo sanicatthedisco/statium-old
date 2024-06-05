@@ -35,7 +35,7 @@ export class SceneManager {
                     throw new Error("A city has not been synced properly");
                 } else {
                     matchingCity.setTroopCount(cityData.troopCount);
-                    matchingCity.setOwner(cityData.ownerId);
+                    if (matchingCity.ownerId != cityData.ownerId) matchingCity.setOwner(cityData.ownerId);
                     matchingCity.troopSendNumber = cityData.troopSendNumber;
                     matchingCity.destination = (this.activeScene as MainScene).map!.regions
                         .find((r) => (

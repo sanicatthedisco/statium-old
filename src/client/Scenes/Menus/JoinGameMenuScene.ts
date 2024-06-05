@@ -3,6 +3,7 @@ import { StylizedText, StylizedInputFactory, StylizedButton } from "../../UI/UI"
 import { Scene } from "../Scene";
 import { GameParameters as Params } from "../../Utils/GameParameters";
 import MenuScene from "./MenuScene";
+import Color from "color";
 
 export default class JoinGameMenuScene extends Scene {
     input: Input;
@@ -12,7 +13,7 @@ export default class JoinGameMenuScene extends Scene {
 
         this.addChild(
             new StylizedText(
-                "Join an existing room", 35, 0x555555,
+                "Join an existing room", 35, Color(0x555555),
                 Params.width/2, 100
             )
         );
@@ -46,7 +47,7 @@ export default class JoinGameMenuScene extends Scene {
     fail() {
         this.addChild(
             new StylizedText("No room could be found with this ID",
-                20, 0xdd0000,
+                20, Color(0xdd0000),
                 Params.width/2, 400
             )
         )

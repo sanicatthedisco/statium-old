@@ -51,8 +51,7 @@ class App {
 	}
 
 	start() {
-		//this.beginConnection();
-
+		this.beginConnection();
 		this.startGame();
 	}
 }

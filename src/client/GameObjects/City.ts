@@ -4,11 +4,13 @@ import { Troop } from './Troop';
 import { Scene } from '../Scenes/Scene';
 import { CityData } from '../Utils/Communication';
 import { GameParameters as Params } from '../Utils/GameParameters';
+import { Region } from './GameMap';
+import Color from 'color';
 //import { ServerCity } from '../../server';
 
 export class City extends GameObject {
 	text: BitmapText;
-	color: number;
+	color: Color;
 	troopCount: number = Params.defaultTroopQuantity;
 	troopIncreaseTicker: number = 0;
 	ownerId?: string;
@@ -22,6 +24,8 @@ export class City extends GameObject {
 	ownerIdOfLastDamagingTroop?: string;
 
 	lastTextUpdateTime: number = 0;
+
+	region?: Region;
 
 	//debug
 	highestTroopId = 0;
@@ -158,12 +162,16 @@ export class City extends GameObject {
 			else newSlot = this.scene.sceneManager.networkManager.getClientSlot(newOwnerId!);
 
 			if (!newSlot) throw new Error("This client has no slot!");
-			this.color = Params.playerColors[newSlot];
+			this.color = Params.playerColors[newSlot-1];
 		}
 
-		this.graphics.beginFill(this.color);
+		this.graphics.beginFill(this.color.hex());
 		this.graphics.drawCircle(0, 0, Params.cityRadius);
 		this.graphics.endFill();
+
+		// Update region too
+		//if (!this.region) throw new Error("No region assigned");
+		this.region?.updateColor(this.color);
 	}
 
 	// User control
@@ -181,18 +189,18 @@ export class City extends GameObject {
 		this.graphics.clear();
 
 		if (type == "origin") {
-			this.graphics.beginFill(Params.originHighlightColor);
+			this.graphics.beginFill(Params.originHighlightColor.hex());
 			this.graphics.drawCircle(0, 0, Params.cityRadius + Params.highlightThickness);
 			this.graphics.endFill();
 		} else if (type == "destination") {
-			this.graphics.beginFill(Params.destinationHighlightColor);
+			this.graphics.beginFill(Params.destinationHighlightColor.hex());
 			this.graphics.drawCircle(0, 0, Params.cityRadius + Params.highlightThickness);
 			this.graphics.endFill();
 		} else if (type != "none") {
 			throw "Not a valid selection type.";
 		}
 
-		this.graphics.beginFill(this.color);
+		this.graphics.beginFill(this.color.hex());
 		this.graphics.drawCircle(0, 0, Params.cityRadius);
 		this.graphics.endFill();
 	}

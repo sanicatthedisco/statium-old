@@ -3,6 +3,7 @@ import { Client } from "../../Utils/Communication";
 import { Scene } from "../Scene";
 import { GameParameters as Params } from "../../Utils/GameParameters";
 import { StylizedButton, StylizedText } from "../../UI/UI";
+import Color from "color";
 
 const testClients: Client[] = [
     {
@@ -94,26 +95,27 @@ class LobbyPlayerTile extends Container {
     static radius = 30;
     static width = 250;
     static height = 90;
-    static color = 0xcccccc;
+    static color = Color(0xcccccc);
 
     gr: Graphics;
     
     constructor(x: number, y: number, clientInfo: Client) {
         super();
-        const playerColor = Params.playerColors[clientInfo.slot];
+        const playerColor = Params.playerColors[clientInfo.slot-1];
+        console.log(clientInfo.slot);
 
         this.x = x;
         this.y = y;
 
         // Background
-        this.gr = new Graphics().beginFill(LobbyPlayerTile.color)
+        this.gr = new Graphics().beginFill(LobbyPlayerTile.color.hex())
             .drawRoundedRect(0, 0, LobbyPlayerTile.width, LobbyPlayerTile.height, 5)
             .endFill();
         // Player icon
         this.gr.beginFill(0xffffff)
             .drawCircle(LobbyPlayerTile.width/2, LobbyPlayerTile.height/2, LobbyPlayerTile.radius+3)
             .endFill();
-        this.gr.beginFill(playerColor)
+        this.gr.beginFill(playerColor.hex())
             .drawCircle(LobbyPlayerTile.width/2, LobbyPlayerTile.height/2, LobbyPlayerTile.radius)
             .endFill();
         

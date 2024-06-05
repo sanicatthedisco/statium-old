@@ -3,6 +3,7 @@ import { GameParameters as Params } from "../client/Utils/GameParameters";
 import { Vector2 } from "../client/Utils/Vector2";
 import ServerCityRepresentation from "./GameObjectRepresentations/ServerCityRepresentation";
 import ServerTroopRepresentation from "./GameObjectRepresentations/ServerTroopRepresentation";
+import MapBuilder from "../client/Utils/MapBuilder";
 
 // We simulate in a very similar way to the clients
 // essentially running our own version of the game

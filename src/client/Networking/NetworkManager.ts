@@ -1,7 +1,7 @@
 import { Socket, io } from "socket.io-client";
 import { SceneManager } from "../Scenes/SceneManager";
 import { MainScene } from "../Scenes/MainScene";
-import { CityData, Client, Command, GameState } from "../Utils/Communication";
+import { CityData, Client, Command, GameState, WorldInitData } from "../Utils/Communication";
 import { City } from "../GameObjects/City";
 import { GameParameters as Params } from "../Utils/GameParameters";
 import NewGameMenuScene from "../Scenes/Menus/NewGameMenuScene";
@@ -52,9 +52,10 @@ export class NetworkManager {
 			}
 		});
 
-		this.socket.on("gameStart", (cityData) => {
-			this.sceneManager.setScene(new MainScene());
-			(this.sceneManager.activeScene as MainScene).initializeCities(cityData);
+		this.socket.on("gameStart", (worldInitData: WorldInitData) => {
+			let main = new MainScene();
+			this.sceneManager.setScene(main);
+			main.initWorld(worldInitData)
 		});
 
 		// When the server sends us its game state to be imposed

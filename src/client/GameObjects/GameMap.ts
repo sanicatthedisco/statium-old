@@ -2,6 +2,8 @@ import { Container, Graphics, Polygon } from "pixi.js";
 import { City } from "./City";
 import MapBuilder from "../Utils/MapBuilder";
 import { Scene } from "../Scenes/Scene";
+import { Vector2 } from "../Utils/Vector2";
+import Color from "color";
 
 export default class GameMap extends Container {
     regions: Region[];
@@ -16,32 +18,48 @@ export default class GameMap extends Container {
 
 export class Region extends Container {
     city: City;
+    shape: Vector2[];
     polygon: Polygon;
     graphics: Graphics;
-    color: number;
+    color: Color;
     id: number;
     static highestAssignedId: number;
 
-    constructor(polygon: Polygon, scene: Scene) {
+    static vectorsToPolygon(shape: Vector2[]): Polygon {
+        let flattenedPoints: number[] = [];
+        shape.forEach((v) => {
+            flattenedPoints.push(v.x);
+            flattenedPoints.push(v.y);
+        });
+        return new Polygon(flattenedPoints);
+    }
+
+    constructor(shape: Vector2[], city: City, scene: Scene) {
         super();
         this.id = Region.highestAssignedId ++;
 
-        this.polygon = polygon;
-        this.color = 0xdddddd;
+        this.shape = shape;
+        this.color = Color(0xdddddd);
         this.graphics = new Graphics();
         this.addChild(this.graphics);
-        this.draw();
 
-        let centroid = MapBuilder.findCentroid(this.polygon);
-        this.city = new City(centroid.x, centroid.y, scene, this.id);
-        this.addChild(this.city);
+        this.city = city;
+        //this.addChild(this.city);
+
+        this.polygon = Region.vectorsToPolygon(this.shape);
+        this.draw();
     }
 
     draw() {
         this.graphics.clear();
-        this.graphics.beginFill(this.color)
-            .lineStyle(3, "white")
+        this.graphics.beginFill(this.color.hex())
+            .lineStyle(3, Color("white").hex())
             .drawPolygon(this.polygon)
             .endFill();
+    }
+
+    updateColor(cityColor: Color) {
+        this.color = cityColor.lighten(0.7);
+        this.draw();
     }
 }

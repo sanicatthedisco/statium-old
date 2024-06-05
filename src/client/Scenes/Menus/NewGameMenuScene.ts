@@ -4,6 +4,7 @@ import { StylizedButton, StylizedInputFactory, StylizedText } from "../../UI/UI"
 import { Input } from "@pixi/ui";
 import MenuScene from "./MenuScene";
 import { MainScene } from "../MainScene";
+import Color from "color";
 
 export default class NewGameMenuScene extends Scene {
     input: Input;
@@ -13,7 +14,7 @@ export default class NewGameMenuScene extends Scene {
 
         this.addChild(
             new StylizedText(
-                "Create new room", 35, 0x555555,
+                "Create new room", 35, Color(0x555555),
                 Params.width/2, 100
             )
         );
@@ -46,7 +47,7 @@ export default class NewGameMenuScene extends Scene {
     fail() {
         this.addChild(
             new StylizedText("A room with this name already exists",
-                20, 0xdd0000,
+                20, Color(0xff0000),
                 Params.width/2, 400
             )
         )

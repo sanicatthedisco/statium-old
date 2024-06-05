@@ -1,12 +1,14 @@
+import Color from "color";
+
 export const GameParameters = 
 {
     // Overall apperance
     width: 640,
     height: 480,
-    backgroundColor: "#eee",
+    backgroundColor: 0xeeeeee,
 
     // Menus
-    titleColor: 0x555555,
+    titleColor: Color(0x555555),
 
     // Networking params
     serverClientUpdateInterval: 50,
@@ -30,10 +32,10 @@ export const GameParameters =
     defaultTroopQuantity: 10,
 
     // City appearance
-    originHighlightColor: 0x0000aa,
-    destinationHighlightColor: 0xaa0000,
+    originHighlightColor: Color(0x0000aa),
+    destinationHighlightColor: Color(0xaa0000),
 	highlightThickness: 5,
-    playerColors: [0x2ba9b4, 0xe39aac, 0x93d4b5, 0xf0dab1],
-	defaultCityColor: 0x888888,
+    playerColors: [Color(0x2ba9b4), Color(0xe39aac), Color(0x93d4b5), Color(0xf0dab1)],
+	defaultCityColor: Color(0x888888),
     textUpdateInterval: 100
 };

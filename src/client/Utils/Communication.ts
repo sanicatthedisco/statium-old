@@ -7,7 +7,7 @@ export interface CityData {
     ownerId?: string;
     troopCount: number;
     troopSendNumber: number;
-    destinationId: number | undefined;
+    destinationId?: number;
     lastSpawnTime?: number;
     lastTroopIncreaseTime?: number;
     lastTroopDamageTime?: number;
@@ -22,6 +22,17 @@ export interface TroopData {
     creationTime: number;
     x: number;
     y: number;
+}
+
+export interface RegionData {
+    points: Vector2[],
+    cityPos: Vector2,
+    id: number // should be same as corresponding city id
+}
+
+export interface WorldInitData {
+    cityDataList: CityData[],
+    regionDataList: RegionData[]
 }
 
 export interface Client {

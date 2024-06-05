@@ -5,23 +5,24 @@ import { Scene } from '../Scenes/Scene';
 import { City } from './City';
 import { CityData } from '../Utils/Communication';
 import { GameParameters as Params } from '../Utils/GameParameters';
+import Color from 'color';
 
 export class Troop extends GameObject {
 	destination: City;
 	dirVector: Vector2;
 	ownerId: string;
-	color: number;
+	color: Color;
 	lastTime: number = Date.now();
 
 	constructor(x: number, y: number, destination: City, scene: Scene, 
-		ownerId: string, color: number, id?: number) {
+		ownerId: string, color: Color, id?: number) {
 		super(x, y, scene);
 
 		this.destination = destination;
 		this.ownerId = ownerId;
 		
 		this.color = color;
-		this.graphics.beginFill(this.color);
+		this.graphics.beginFill(this.color.hex());
 		this.graphics.drawCircle(0, 0, Params.troopRadius);
 		this.graphics.endFill();
 		this.zIndex = 0;

@@ -25,11 +25,11 @@ export class SceneManager {
     imposeGameState(gameState: GameState) {
         // Probably very unoptimized
         if (this.activeScene instanceof MainScene) {
+            if (!this.activeScene.map) throw new Error("Scene has not been properly initialized yet");
             gameState.cityDataList.forEach((cityData) => {
-
-                let matchingCity = (this.activeScene as MainScene).cities.find((city) => 
-                    {return city.id == cityData.id}
-                );
+                let matchingCity = (this.activeScene as MainScene).map!.regions.find((r) => 
+                    (r.city.id == cityData.id)
+                )?.city;
 
                 if (matchingCity == undefined) {
                     throw new Error("A city has not been synced properly");
@@ -37,8 +37,10 @@ export class SceneManager {
                     matchingCity.setTroopCount(cityData.troopCount);
                     matchingCity.setOwner(cityData.ownerId);
                     matchingCity.troopSendNumber = cityData.troopSendNumber;
-                    matchingCity.destination = (this.activeScene as MainScene).cities
-                                                    .find((city) => (city.id==cityData.destinationId));
+                    matchingCity.destination = (this.activeScene as MainScene).map!.regions
+                        .find((r) => (
+                            r.city.id==cityData.destinationId
+                        ))?.city;
                 }
             });
         } else {

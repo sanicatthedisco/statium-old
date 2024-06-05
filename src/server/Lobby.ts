@@ -1,10 +1,13 @@
-import { CityData, Client, Command } from "../client/Utils/Communication";
+import { CityData, Client, Command, WorldInitData } from "../client/Utils/Communication";
 import { Vector2 } from "../client/Utils/Vector2";
 import App from "./App";
 import { GameSimulator } from "./Simulator";
 import { GameParameters as Params } from "../client/Utils/GameParameters";
 import { Socket } from "socket.io";
 import ServerCityRepresentation from "./GameObjectRepresentations/ServerCityRepresentation";
+import MapBuilder from "../client/Utils/MapBuilder";
+import fs from "node:fs";
+import path from "node:path";
 
 export default class Lobby {
     id: string;
@@ -19,6 +22,8 @@ export default class Lobby {
 
     timers: NodeJS.Timeout[] = [];
 
+    worldInitData: WorldInitData;
+
     listeners: {
         socketId: string,
         callback: (...args: any[]) => void, 
@@ -28,9 +33,16 @@ export default class Lobby {
     constructor(id: string, app: App) {
         this.app = app;
         this.id = id;
+
+        try {
+            const mapData = fs.readFileSync(path.join(__dirname, "../../../src/client/Assets/europe.svg"), 'utf8');
+            this.worldInitData = this.generateWorld(mapData);
+        } catch (err) {
+            throw err;
+        }
         
         this.simulator = new GameSimulator(
-            this.generateCities(Params.numberOfCities)
+            this.worldInitData.cityDataList
         );
     }
 
@@ -82,8 +94,8 @@ export default class Lobby {
         console.log("Game state simulation started");
 
         // Let everyone know the game is starting
-        let cityDataList = this.simulator.getGameState().cityDataList;
-        this.app.io.to(this.id).emit("gameStart", cityDataList);
+        // let cityDataList = this.simulator.getGameState().cityDataList;
+        this.app.io.to(this.id).emit("gameStart", this.worldInitData);
 
         // Give each client a starting city which isn't taken already
         this.clients.forEach((client) => {
@@ -117,7 +129,26 @@ export default class Lobby {
             this.app.destroyLobby(this.id);
         }
     }
+    
+    generateWorld(svgData: string): WorldInitData {
+        let regionDataList = (new MapBuilder(svgData)).buildRegionData();
+        let cityDataList = regionDataList.map((region) => (
+            {
+                id: region.id,
+                x: region.cityPos.x,
+                y: region.cityPos.y,
+                troopCount: 10, // TODO: remove magic number
+                troopSendNumber: 0,
+            }
+        ));
 
+        return {
+            regionDataList: regionDataList,
+            cityDataList: cityDataList
+        };
+    }
+
+    /*
     generateCities(quantity: number): CityData[] {
         // Create a number of ServerCity instances
         let cities: CityData[] = [];
@@ -136,7 +167,7 @@ export default class Lobby {
             cities.push(city)
         }
         return cities;
-    }
+    }*/
 
     cityIntersectsOther(cityToCheck: CityData, cities: CityData[]) {
         let intersects = false;

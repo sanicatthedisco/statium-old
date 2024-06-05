@@ -1,8 +1,9 @@
 import { ButtonContainer, Input } from "@pixi/ui";
+import Color from "color";
 import { BitmapText, Graphics } from "pixi.js";
 
 export class StylizedText extends BitmapText {
-    constructor(text: string, size: number, color: number, x: number, y: number) {
+    constructor(text: string, size: number, color: Color, x: number, y: number) {
         super(text, {
             fontName: "TroopCountFont",
             fontSize: size,
@@ -12,18 +13,18 @@ export class StylizedText extends BitmapText {
         this.roundPixels = true;
         this.x = x;
         this.y = y;
-        this.tint = color;
+        this.tint = color.hex();
     }
 }
 
 export class StylizedButton extends ButtonContainer {
     static colors = {
-        default: 0xaaaaaa,
-        hover: 0x999999,
-        pressed: 0x777777,
+        default: Color(0xaaaaaa),
+        hover: Color(0x999999),
+        pressed: Color(0x777777),
     };
 
-    color: number = 0xaaaaaa;
+    color: Color = StylizedButton.colors.default;
     graphics: Graphics;
     w: number;
     h: number;
@@ -80,18 +81,18 @@ export class StylizedButton extends ButtonContainer {
 
     draw() {
         this.graphics.clear();
-        this.graphics.beginFill(this.color)
+        this.graphics.beginFill(this.color.hex())
             .drawRoundedRect(-this.w/2, -this.h/2, this.w, this.h, 5)
             .endFill();
     }
 }
 
 export class StylizedInputFactory {
-    color: number = 0xcccccc;
-    textColor: number = 0xffffff;
+    color: Color = Color(0xcccccc);
+    textColor: Color = Color(0xffffff);
 
     buildInput(placeholder: string, x: number, y: number, w: number, h: number) {
-        let graphics = new Graphics().beginFill(this.color);
+        let graphics = new Graphics().beginFill(this.color.hex());
         graphics.drawRoundedRect(0, 0, w, h, 5);
         graphics.endFill();
 
@@ -100,7 +101,7 @@ export class StylizedInputFactory {
             placeholder: placeholder,
             padding: 0,
             align: "center",
-            textStyle: {fill: this.textColor}
+            textStyle: {fill: this.textColor.hex()}
         });
         i.x = x-w/2;
         i.y = y-h/2;

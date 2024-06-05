@@ -1,26 +1,44 @@
 import { FederatedPointerEvent } from "pixi.js";
 import { Scene } from "./Scene";
 import { City } from "../GameObjects/City";
-import { CityData, Command, GameState } from "../Utils/Communication";
+import { CityData, Command, GameState, WorldInitData } from "../Utils/Communication";
 import InGamePopupMenu from "../UI/InGamePopupMenu";
+import GameMap, { Region } from "../GameObjects/GameMap";
 
 export class MainScene extends Scene {
     originSelection: City | undefined = undefined;
     destinationSelection: City | undefined = undefined;
 
-    cities: City[] = [];
+    //cities: City[] = [];
+    map?: GameMap;
 
     constructor() {
         super();
     }
 
-    initializeCities(cityData: CityData[]) {
+    initWorld(worldInitData: WorldInitData) {
         if (!this.sceneManager) throw new Error("Scene manager has not been assigned");
         this.addChild(new InGamePopupMenu(this.sceneManager));
-        cityData.forEach((city) => {
-            this.cities.push(new City(city.x, city.y, this, city.id, city.ownerId));
-        });
+
+        // Turn region data and into regions
+        // and instantiate cities from city data as their children
+        let regions = worldInitData.regionDataList.map((rd) => {
+            const cd = worldInitData.cityDataList.find((cd) => (cd.id == rd.id))
+            if (!cd) throw new Error("No corresponding city found!");
+
+            const r = new Region(
+                rd.points,
+                new City(cd.x, cd.y, this, cd.id),
+                this
+            );
+            r.city.region = r;
+
+            return r;
+        })
+
+        this.map = new GameMap(regions, this);
     }
+
     issueCommand(origin: City, destination: City, troopSendNumber: number) {
         origin.commandToSendTroops(troopSendNumber, destination);
         let command: Command = {
@@ -33,8 +51,9 @@ export class MainScene extends Scene {
 
     getCityDataList(): CityData[] {
         let cityDataList: CityData[] = [];
-        this.cities.forEach((city) => {
-            let cityData = City.toCityData(city);
+        if (!this.map) throw new Error("Scene has not been properly initialized yet");
+        this.map.regions.forEach((r) => {
+            let cityData = City.toCityData(r.city);
             cityDataList.push(cityData);
         }); 
         return cityDataList;

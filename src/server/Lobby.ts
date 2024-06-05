@@ -58,7 +58,6 @@ export default class Lobby {
         socket.on("leaveLobby", () => {
             this.leaveLobby(socket);
         });
-
         socket.on("requestGameStart", () => {
             // TODO: needs validation
             this.startGame(socket);

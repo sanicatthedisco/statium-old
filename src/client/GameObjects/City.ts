@@ -21,6 +21,8 @@ export class City extends GameObject {
 	lastTroopDamageTime?: number;
 	ownerIdOfLastDamagingTroop?: string;
 
+	lastTextUpdateTime: number = 0;
+
 	//debug
 	highestTroopId = 0;
 
@@ -68,7 +70,6 @@ export class City extends GameObject {
 				this.regenerateTroops();
 			}
 		}
-
 
 
 	}
@@ -138,7 +139,11 @@ export class City extends GameObject {
 		}
 
 		if (!this.text) throw new Error("There is no text on this city!");
-		this.text.text = this.troopCount.toString();
+
+		if (Date.now() - this.lastTextUpdateTime > Params.textUpdateInterval) {
+			this.lastTextUpdateTime = Date.now();
+			this.text.text = this.troopCount.toString();
+		}
 	}
 	changeTroopCountBy = (delta: number) => {this.setTroopCount(this.troopCount + delta)};
 

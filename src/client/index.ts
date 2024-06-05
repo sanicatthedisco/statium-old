@@ -6,6 +6,10 @@ import { MainScene } from "./Scenes/MainScene";
 import { GameParameters as Params } from "./Utils/GameParameters";
 import MenuScene from "./Scenes/Menus/MenuScene";
 
+// @ts-ignore
+import map from "./Assets/europe.svg";
+import MapBuilder from "./Utils/MapBuilder";
+
 // Game stuff
 BitmapFont.from("TroopCountFont", {
 	fontFamily: "Arial",
@@ -47,11 +51,13 @@ class App {
 	}
 
 	start() {
-		this.beginConnection();
+		//this.beginConnection();
+
 		this.startGame();
 	}
 }
 
 const app: App = new App(appParams);
-
 app.start();
+
+//const gameMap = (new MapBuilder(map)).buildMap();

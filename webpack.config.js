@@ -63,11 +63,22 @@ module.exports = {
             test: /\.ts$/,
             loader: "ts-loader",
             exclude: [/node-modules/],
-        }
+        },
+        
+        {
+          test: /\.svg$/,
+          use: [
+            "raw-loader",
+          ]
+        },
       ],
     },
     resolve: {
-        extensions: [".js", ".ts"],
+        extensions: [".js", ".ts", ".svg"],
+        fallback: {
+          "buffer": require.resolve("buffer/"),
+          "fs": false,
+        },
     },
     /*
     optimization: {

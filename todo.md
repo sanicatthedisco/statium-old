@@ -1,0 +1,3 @@
+- Remove client from game when they leave a lobby
+- Add win screen
+- Add map

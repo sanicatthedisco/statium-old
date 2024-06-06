@@ -104,7 +104,7 @@ export default class Lobby {
                 clientAssignedCity = this.randomChoice(this.simulator.cities);
             } while (clientAssignedCity.ownerId != undefined)
             clientAssignedCity.ownerId = client.id;
-            clientAssignedCity.troopCount += 20;
+            //clientAssignedCity.troopCount += 20;
         })
     }
 

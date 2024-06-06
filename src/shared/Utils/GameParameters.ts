@@ -16,11 +16,11 @@ export const GameParameters =
     simulationStepInterval: 10,
     
     // Troops
-    troopSpeed: 0.3,
+    troopSpeed: 0.2,
     troopRadius: 10,
 
     // Troop spawning
-    troopSpawnInterval: 100,
+    troopSpawnInterval: 150,
     maxTroopCount: 99,
     maxTroopCountUnowned: 20,
     troopIncreaseInterval: 400,

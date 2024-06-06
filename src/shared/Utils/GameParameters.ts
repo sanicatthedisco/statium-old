@@ -27,10 +27,11 @@ export const GameParameters =
     damageRecoveryTime: 500,
 
     // Cities
-    cityRadius: 20,
+    cityRadius: 15,
     cityMargin: 20,
     numberOfCities: 10,
     defaultTroopQuantity: 10,
+    cityFontSize: 20,
 
     // City appearance
     originHighlightColor: Color(0x0000aa),

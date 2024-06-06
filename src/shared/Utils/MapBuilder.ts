@@ -54,7 +54,7 @@ export default class MapBuilder {
             this.shapes.push(this.svgPointsToVectors(polygon.$.points))
         });
 
-        this.shapes = this.adjustShapes(this.shapes, new Vector2(50, -70), 0.5);
+        this.shapes = this.adjustShapes(this.shapes, new Vector2(20, -200), 0.43);
     }
 
     svgPointsToVectors(pointString: string) {

@@ -13,6 +13,7 @@ export class MainScene extends Scene {
     //cities: City[] = [];
     map?: GameMap;
     won = false;
+    startingPlayerIds: string[] = [];
 
     constructor() {
         super();
@@ -21,7 +22,7 @@ export class MainScene extends Scene {
     override update(deltaTime: number) {
         super.update(deltaTime);
 
-        if (this.map && !this.won) {
+        if (this.map && !this.won && this.startingPlayerIds.length > 1) {
             let remainingPlayerIds = this.getRemainingPlayerIds(this.map.regions);
             if (remainingPlayerIds.length == 1) {
                 if (!this.sceneManager) throw new Error("No scenemanager found");
@@ -30,6 +31,11 @@ export class MainScene extends Scene {
                 this.won = true;
             }
         }
+    }
+
+    override awake() {
+        if (this.map)
+            this.startingPlayerIds = this.getRemainingPlayerIds(this.map.regions);
     }
 
     getRemainingPlayerIds(regions: Region[]): string[] {

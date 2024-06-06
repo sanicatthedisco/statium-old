@@ -45,7 +45,7 @@ export class City extends GameObject {
 		// Troop number text
 		this.text = new BitmapText("0", {
 			fontName: "TroopCountFont",
-			fontSize: 25,
+			fontSize: Params.cityFontSize,
 			align: "center"
 		})
 		this.text.anchor.set(0.5, 0.5);

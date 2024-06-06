@@ -1,7 +1,7 @@
 import { Input } from "@pixi/ui";
 import { StylizedText, StylizedInputFactory, StylizedButton } from "../../UI/UI";
 import { Scene } from "../Scene";
-import { GameParameters as Params } from "../../Utils/GameParameters";
+import { GameParameters as Params } from "../../../shared/Utils/GameParameters";
 import MenuScene from "./MenuScene";
 import Color from "color";
 

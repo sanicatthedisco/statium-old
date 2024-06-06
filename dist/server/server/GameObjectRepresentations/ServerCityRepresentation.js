@@ -3,9 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const Vector2_1 = require("../../client/Utils/Vector2");
+const Vector2_1 = require("../../shared/Utils/Vector2");
 const ServerTroopRepresentation_1 = __importDefault(require("./ServerTroopRepresentation"));
-const GameParameters_1 = require("../../client/Utils/GameParameters");
+const GameParameters_1 = require("../../shared/Utils/GameParameters");
 class ServerCityRepresentation {
     constructor(id, position, simulator, ownerId) {
         this.troopCount = GameParameters_1.GameParameters.defaultTroopQuantity;

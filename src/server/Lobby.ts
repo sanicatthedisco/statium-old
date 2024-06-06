@@ -1,11 +1,11 @@
-import { CityData, Client, Command, WorldInitData } from "../client/Utils/Communication";
-import { Vector2 } from "../client/Utils/Vector2";
+import { CityData, Client, Command, WorldInitData } from "../shared/Utils/Communication";
+import { Vector2 } from "../shared/Utils/Vector2";
 import App from "./App";
 import { GameSimulator } from "./Simulator";
-import { GameParameters as Params } from "../client/Utils/GameParameters";
+import { GameParameters as Params } from "../shared/Utils/GameParameters";
 import { Socket } from "socket.io";
 import ServerCityRepresentation from "./GameObjectRepresentations/ServerCityRepresentation";
-import MapBuilder from "../client/Utils/MapBuilder";
+import MapBuilder from "../shared/Utils/MapBuilder";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -35,7 +35,7 @@ export default class Lobby {
         this.id = id;
 
         try {
-            const mapData = fs.readFileSync(path.join(__dirname, "../../../src/client/Assets/europe.svg"), 'utf8');
+            const mapData = fs.readFileSync(path.join(__dirname, "../../../src/shared/Assets/europe.svg"), 'utf8');
             this.worldInitData = this.generateWorld(mapData);
         } catch (err) {
             throw err;
@@ -98,13 +98,14 @@ export default class Lobby {
         this.app.io.to(this.id).emit("gameStart", this.worldInitData);
 
         // Give each client a starting city which isn't taken already
-        this.clients.forEach((client) => {
+        this.clients.forEach((client, i, arr) => {
             let clientAssignedCity: ServerCityRepresentation;
             do {
                 clientAssignedCity = this.randomChoice(this.simulator.cities);
             } while (clientAssignedCity.ownerId != undefined)
             clientAssignedCity.ownerId = client.id;
-            clientAssignedCity.troopCount += 20;
+            // DEBUG
+            if (i == 1) clientAssignedCity.troopCount += 20;
         })
     }
 

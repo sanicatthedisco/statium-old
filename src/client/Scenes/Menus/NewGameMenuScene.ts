@@ -1,5 +1,5 @@
 import { Scene } from "../Scene";
-import { GameParameters as Params } from "../../Utils/GameParameters";
+import { GameParameters as Params } from "../../../shared/Utils/GameParameters";
 import { StylizedButton, StylizedInputFactory, StylizedText } from "../../UI/UI";
 import { Input } from "@pixi/ui";
 import MenuScene from "./MenuScene";

@@ -2,8 +2,8 @@ import { BitmapText, FederatedPointerEvent } from 'pixi.js';
 import { GameObject } from './GameObject';
 import { Troop } from './Troop';
 import { Scene } from '../Scenes/Scene';
-import { CityData } from '../Utils/Communication';
-import { GameParameters as Params } from '../Utils/GameParameters';
+import { CityData } from '../../shared/Utils/Communication';
+import { GameParameters as Params } from '../../shared/Utils/GameParameters';
 import { Region } from './GameMap';
 import Color from 'color';
 //import { ServerCity } from '../../server';
@@ -169,9 +169,6 @@ export class City extends GameObject {
 		this.graphics.drawCircle(0, 0, Params.cityRadius);
 		this.graphics.endFill();
 
-		// Update region too
-		//if (!this.region) throw new Error("No region assigned");
-		console.log(newOwnerId, this.color.hex());
 		this.region?.updateColor(this.color);
 	}
 

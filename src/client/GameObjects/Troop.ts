@@ -1,10 +1,10 @@
 import { Application, Graphics, Container, Ticker, Point, BitmapFont, BitmapText } from 'pixi.js'
 import { GameObject } from './GameObject';
-import { Vector2 } from '../Utils/Vector2';
+import { Vector2 } from '../../shared/Utils/Vector2';
 import { Scene } from '../Scenes/Scene';
 import { City } from './City';
-import { CityData } from '../Utils/Communication';
-import { GameParameters as Params } from '../Utils/GameParameters';
+import { CityData } from '../../shared/Utils/Communication';
+import { GameParameters as Params } from '../../shared/Utils/GameParameters';
 import Color from 'color';
 
 export class Troop extends GameObject {

@@ -1,8 +1,8 @@
 import { Container, Graphics, Polygon } from "pixi.js";
 import { City } from "./City";
-import MapBuilder from "../Utils/MapBuilder";
+import MapBuilder from "../../shared/Utils/MapBuilder";
 import { Scene } from "../Scenes/Scene";
-import { Vector2 } from "../Utils/Vector2";
+import { Vector2 } from "../../shared/Utils/Vector2";
 import Color from "color";
 
 export default class GameMap extends Container {
@@ -60,7 +60,6 @@ export class Region extends Container {
 
     updateColor(cityColor: Color) {
         this.color = cityColor.lightness(cityColor.l() * 1.2);
-        console.log(this.color.hex());
         this.draw();
     }
 }

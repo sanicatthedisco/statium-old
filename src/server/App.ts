@@ -1,6 +1,6 @@
 import { Server, Socket } from 'socket.io';
-import { Client, Command } from '../client/Utils/Communication';
-import { GameParameters as Params } from '../client/Utils/GameParameters';
+import { Client, Command } from '../shared/Utils/Communication';
+import { GameParameters as Params } from '../shared/Utils/GameParameters';
 import Lobby from "./Lobby";
 import express from 'express';
 import http from "http";

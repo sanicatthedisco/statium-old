@@ -1,7 +1,7 @@
 import { BitmapText, Graphics } from "pixi.js";
 import { Scene } from "../Scene";
 import { Button, ButtonContainer } from "@pixi/ui";
-import { GameParameters as Params } from "../../Utils/GameParameters";
+import { GameParameters as Params } from "../../../shared/Utils/GameParameters";
 import { MainScene } from "../MainScene";
 import { StylizedButton, StylizedText } from "../../UI/UI";
 import NewGameMenuScene from "./NewGameMenuScene";

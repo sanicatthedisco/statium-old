@@ -1,9 +1,9 @@
 import { Socket, io } from "socket.io-client";
 import { SceneManager } from "../Scenes/SceneManager";
 import { MainScene } from "../Scenes/MainScene";
-import { CityData, Client, Command, GameState, WorldInitData } from "../Utils/Communication";
+import { CityData, Client, Command, GameState, WorldInitData } from "../../shared/Utils/Communication";
 import { City } from "../GameObjects/City";
-import { GameParameters as Params } from "../Utils/GameParameters";
+import { GameParameters as Params } from "../../shared/Utils/GameParameters";
 import NewGameMenuScene from "../Scenes/Menus/NewGameMenuScene";
 import JoinGameMenuScene from "../Scenes/Menus/JoinGameMenuScene";
 import LobbyStagingScene from "../Scenes/Menus/LobbyStagingScene";

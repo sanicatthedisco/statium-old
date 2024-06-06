@@ -1,6 +1,6 @@
 import { Container, Graphics } from "pixi.js";
 import { Scene } from "../Scenes/Scene";
-import { Vector2 } from "../Utils/Vector2";
+import { Vector2 } from "../../shared/Utils/Vector2";
 
 export class GameObject extends Container {
 	graphics: Graphics;

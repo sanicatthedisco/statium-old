@@ -1,6 +1,6 @@
 import { Container, Graphics } from "pixi.js";
 import { StylizedButton } from "./UI";
-import { GameParameters as Params } from "../Utils/GameParameters";
+import { GameParameters as Params } from "../../shared/Utils/GameParameters";
 import { SceneManager } from "../Scenes/SceneManager";
 
 export default class InGamePopupMenu extends Container {
@@ -66,11 +66,11 @@ export default class InGamePopupMenu extends Container {
     }
 
     buildPopupMenu(): Container {
-        const color = 0xdddddd;
+        const color = Params.popupBackgroundColor;
         const margin = 50;
         const container = new Container();
         const gr = new Graphics();
-        gr.beginFill(color);
+        gr.beginFill(color.hex());
         gr.drawRoundedRect(margin, margin, 
                 Params.width - margin*2, Params.height - margin*2, 5);
         gr.endFill();

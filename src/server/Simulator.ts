@@ -1,9 +1,9 @@
-import { CityData, GameState, TroopData } from "../client/Utils/Communication";
-import { GameParameters as Params } from "../client/Utils/GameParameters";
-import { Vector2 } from "../client/Utils/Vector2";
+import { CityData, GameState, TroopData } from "../shared/Utils/Communication";
+import { GameParameters as Params } from "../shared/Utils/GameParameters";
+import { Vector2 } from "../shared/Utils/Vector2";
 import ServerCityRepresentation from "./GameObjectRepresentations/ServerCityRepresentation";
 import ServerTroopRepresentation from "./GameObjectRepresentations/ServerTroopRepresentation";
-import MapBuilder from "../client/Utils/MapBuilder";
+import MapBuilder from "../shared/Utils/MapBuilder";
 
 // We simulate in a very similar way to the clients
 // essentially running our own version of the game

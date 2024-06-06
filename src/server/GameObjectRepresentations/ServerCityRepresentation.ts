@@ -1,7 +1,7 @@
-import { Vector2 } from "../../client/Utils/Vector2";
+import { Vector2 } from "../../shared/Utils/Vector2";
 import ServerTroopRepresentation from "./ServerTroopRepresentation";
-import { GameParameters as Params } from "../../client/Utils/GameParameters";
-import { CityData } from "../../client/Utils/Communication";
+import { GameParameters as Params } from "../../shared/Utils/GameParameters";
+import { CityData } from "../../shared/Utils/Communication";
 import { Server } from "socket.io";
 import { GameSimulator } from "../Simulator";
 

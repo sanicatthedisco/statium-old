@@ -1,7 +1,7 @@
 import { Container } from "pixi.js";
 import { NetworkManager } from "../Networking/NetworkManager";
 import { Scene } from "./Scene";
-import { GameState } from "../Utils/Communication";
+import { GameState } from "../../shared/Utils/Communication";
 import { MainScene } from "./MainScene";
 import MenuScene from "./Menus/MenuScene";
 

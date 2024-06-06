@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const Vector2_1 = require("../../client/Utils/Vector2");
-const GameParameters_1 = require("../../client/Utils/GameParameters");
+const Vector2_1 = require("../../shared/Utils/Vector2");
+const GameParameters_1 = require("../../shared/Utils/GameParameters");
 class ServerTroopRepresentation {
     constructor(position, destination, ownerId) {
         this.destroyMe = false;

@@ -9,6 +9,7 @@ export const GameParameters =
 
     // Menus
     titleColor: Color(0x555555),
+    popupBackgroundColor: Color(0xdddddd),
 
     // Networking params
     serverClientUpdateInterval: 50,

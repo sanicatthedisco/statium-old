@@ -1,8 +1,8 @@
 import { Server } from "socket.io";
-import { Vector2 } from "../../client/Utils/Vector2";
-import { CityData, TroopData } from "../../client/Utils/Communication";
+import { Vector2 } from "../../shared/Utils/Vector2";
+import { CityData, TroopData } from "../../shared/Utils/Communication";
 import ServerCityRepresentation from "./ServerCityRepresentation";
-import { GameParameters as Params } from "../../client/Utils/GameParameters";
+import { GameParameters as Params } from "../../shared/Utils/GameParameters";
 
 export default class ServerTroopRepresentation {
     static highestAssignedId: number = 0;

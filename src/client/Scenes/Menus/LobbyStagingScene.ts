@@ -1,7 +1,7 @@
 import { Container, Graphics } from "pixi.js";
-import { Client } from "../../Utils/Communication";
+import { Client } from "../../../shared/Utils/Communication";
 import { Scene } from "../Scene";
-import { GameParameters as Params } from "../../Utils/GameParameters";
+import { GameParameters as Params } from "../../../shared/Utils/GameParameters";
 import { StylizedButton, StylizedText } from "../../UI/UI";
 import Color from "color";
 

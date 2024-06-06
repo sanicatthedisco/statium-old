@@ -1,6 +1,6 @@
 {
-  "include": ["src/server/index.ts", "src/client/Utils/custom.d.ts"],
-  "files": ["src/client/Utils/custom.d.ts"],
+  "include": ["src/server/index.ts", "src/shared/Utils/custom.d.ts"],
+  "files": ["src/shared/Utils/custom.d.ts"],
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig to read more about this file */
 

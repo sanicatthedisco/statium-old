@@ -1,9 +1,10 @@
 import { FederatedPointerEvent } from "pixi.js";
 import { Scene } from "./Scene";
 import { City } from "../GameObjects/City";
-import { CityData, Command, GameState, WorldInitData } from "../Utils/Communication";
+import { CityData, Command, GameState, WorldInitData } from "../../shared/Utils/Communication";
 import InGamePopupMenu from "../UI/InGamePopupMenu";
 import GameMap, { Region } from "../GameObjects/GameMap";
+import GameResultPopupMenu from "../UI/GameResultPopupMenu";
 
 export class MainScene extends Scene {
     originSelection: City | undefined = undefined;
@@ -11,9 +12,36 @@ export class MainScene extends Scene {
 
     //cities: City[] = [];
     map?: GameMap;
+    won = false;
 
     constructor() {
         super();
+    }
+
+    override update(deltaTime: number) {
+        super.update(deltaTime);
+
+        if (this.map && !this.won) {
+            let remainingPlayerIds = this.getRemainingPlayerIds(this.map.regions);
+            if (remainingPlayerIds.length == 1) {
+                if (!this.sceneManager) throw new Error("No scenemanager found");
+                let isWinner = remainingPlayerIds[0] == this.sceneManager.networkManager.socket?.id;
+                this.addChild(new GameResultPopupMenu(isWinner, this.sceneManager));
+                this.won = true;
+            }
+        }
+    }
+
+    getRemainingPlayerIds(regions: Region[]): string[] {
+        let remainingIds: string[] = [];
+
+        regions.forEach((region) => {
+            if (region.city.ownerId) {
+                if (!(remainingIds.includes(region.city.ownerId)))
+                    remainingIds.push(region.city.ownerId)
+            }
+        });
+        return remainingIds;
     }
 
     initWorld(worldInitData: WorldInitData) {

@@ -33,7 +33,7 @@ export class Scene extends Container {
 
 		this.gameObjects.forEach((go) => {
 			go.update(deltaTime);
-		})
+		});
 	}
 
 	manageSelection(city: City, e: FederatedPointerEvent) {

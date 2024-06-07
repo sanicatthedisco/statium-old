@@ -52,3 +52,7 @@ export interface Command {
     destinationId: number,
     troopCount: number
 }
+
+export interface LobbyResult {
+    succeeded: boolean;
+}

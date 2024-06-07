@@ -4,7 +4,7 @@ import { Troop } from './Troop';
 import { Scene } from '../Scenes/Scene';
 import { CityData } from '../../shared/Utils/Communication';
 import { GameParameters as Params } from '../../shared/Utils/GameParameters';
-import { Region } from './GameMap';
+import { Region } from './Region';
 import Color from 'color';
 //import { ServerCity } from '../../server';
 

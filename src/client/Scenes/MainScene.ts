@@ -3,8 +3,9 @@ import { Scene } from "./Scene";
 import { City } from "../GameObjects/City";
 import { CityData, Command, GameState, WorldInitData } from "../../shared/Utils/Communication";
 import InGamePopupMenu from "../UI/InGamePopupMenu";
-import GameMap, { Region } from "../GameObjects/GameMap";
+import GameMap from "../GameObjects/GameMap";
 import GameResultPopupMenu from "../UI/GameResultPopupMenu";
+import { Region } from "../GameObjects/Region";
 
 export class MainScene extends Scene {
     originSelection: City | undefined = undefined;
@@ -34,8 +35,8 @@ export class MainScene extends Scene {
     }
 
     override awake() {
-        if (this.map)
-            this.startingPlayerIds = this.getRemainingPlayerIds(this.map.regions);
+        if (!this.map) throw new Error("No map initialized on awake; can't get starting player IDs");
+        this.startingPlayerIds = this.getRemainingPlayerIds(this.map.regions);
     }
 
     getRemainingPlayerIds(regions: Region[]): string[] {

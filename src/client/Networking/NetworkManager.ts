@@ -9,7 +9,7 @@ import JoinGameMenuScene from "../Scenes/Menus/JoinGameMenuScene";
 import LobbyStagingScene from "../Scenes/Menus/LobbyStagingScene";
 
 export class NetworkManager {
-	socket: Socket;
+	socket!: Socket;
 	clients: Client[] = [];
 	sceneManager!: SceneManager;
 	commandBuffer: Command[] = [];
@@ -82,7 +82,7 @@ export class NetworkManager {
 
 	// // Outgoing event emission
 
-	updateServerWithGameState(gameState) {
+	updateServerWithGameState(gameState: GameState) {
 		this.socket.emit("clientGameState", {
 			clientId: this.socket!.id, 
 			clientGameState: gameState

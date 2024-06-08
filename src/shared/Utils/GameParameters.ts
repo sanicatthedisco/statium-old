@@ -39,5 +39,8 @@ export const GameParameters =
 	highlightThickness: 5,
     playerColors: [Color(0x2ba9b4), Color(0xe39aac), Color(0x93d4b5), Color(0xf0dab1)],
 	defaultCityColor: Color(0x888888),
-    textUpdateInterval: 100
+    textUpdateInterval: 100,
+
+    // Regions
+    defaultRegionColor: Color(0xdddddd),
 };

@@ -11,7 +11,7 @@
     "dev": "concurrently --kill-others \"npm run server\" \"npm run client\""
   },
   "keywords": [],
-  "author": "",
+  "author": "Jared Lenn",
   "license": "ISC",
   "description": "",
   "mode": "development",

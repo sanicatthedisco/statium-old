@@ -104,6 +104,10 @@ export default class ServerCityRepresentation {
 		} else {
 			this.troopCount = this.ownerId ? Params.maxTroopCount : Params.maxTroopCountUnowned;
 		}
+
+		if (this.troopCount < 0) {
+			this.troopCount = 0;
+		}
 	}
 	changeTroopCountBy = (delta: number) => {this.setTroopCount(this.troopCount + delta)};
 

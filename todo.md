@@ -1,7 +1,5 @@
 # Features
 - Remove client from game when they leave a lobby
-- Clean up codebase
-- Click territory instead of city
 - Dragging
 
 # Bugs

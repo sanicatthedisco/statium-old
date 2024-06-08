@@ -102,7 +102,6 @@ class LobbyPlayerTile extends Container {
     constructor(x: number, y: number, clientInfo: Client) {
         super();
         const playerColor = Params.playerColors[clientInfo.slot-1];
-        console.log(clientInfo.slot);
 
         this.x = x;
         this.y = y;

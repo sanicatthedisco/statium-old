@@ -56,8 +56,8 @@ export class City extends GameObject {
 		this.setTroopCount(this.troopCount);
 
 		// Deal with mouse clicks
-		this.eventMode = "dynamic";
-		this.on("pointertap", this.onClick, this);
+		//this.eventMode = "dynamic";
+		//this.on("pointertap", this.onClick, this);
 	}
 
 	override update(deltaTime: number) {
@@ -179,19 +179,21 @@ export class City extends GameObject {
 		this.destination = destination;
 	}
 
+	/*
 	onClick(e: FederatedPointerEvent) {
 		this.scene.manageSelection(this, e);
-	}
+	}*/
 
 	selectAs(type: String) {
 		this.graphics.clear();
+		let highlightColor = this.color.mix(Color("white"), 0.93);
 
 		if (type == "origin") {
-			this.graphics.beginFill(Params.originHighlightColor.hex());
+			this.graphics.beginFill(highlightColor.hex());
 			this.graphics.drawCircle(0, 0, Params.cityRadius + Params.highlightThickness);
 			this.graphics.endFill();
 		} else if (type == "destination") {
-			this.graphics.beginFill(Params.destinationHighlightColor.hex());
+			this.graphics.beginFill(highlightColor.hex());
 			this.graphics.drawCircle(0, 0, Params.cityRadius + Params.highlightThickness);
 			this.graphics.endFill();
 		} else if (type != "none") {

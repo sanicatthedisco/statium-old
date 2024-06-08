@@ -27,6 +27,11 @@ export default class App {
         this.io = this.initServer();
 
         this.io.on("connection", this.handleConnection.bind(this));
+
+        setInterval(() => {
+            const used = process.memoryUsage();
+            console.log("Heap used: " + used.heapUsed / 1024 / 1024 + " MB")
+        }, 1000);
     }
 
     handleConnection(socket: Socket) {
